@@ -175,7 +175,7 @@ std::vector<double> & Thomas_solver(const std::vector<double>& l, const std::vec
   dprime[0] = b.at(0) / d.at(1);
 
   for (size_t i = 1; i < n - 1; i++) {
-    // /!\ the indices for the current values of some variables start at 1 instead of 0
+    // /!\ the indices for the current values of some variables start at 1 instead of 0 (or maybe not xD)
     double u_curr = u.at(i+1);
     double d_curr = d.at(i+1);
     double l_curr = l.at(i+1);
