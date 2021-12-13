@@ -62,4 +62,18 @@ class FDMEulerExplicit : public FDMBase {
   void step_march();
 };
 
+class FDMEulerImplicit : public FDMBase {
+ protected:
+  void calculate_step_sizes();
+  void set_initial_conditions();
+  void calculate_boundary_conditions();
+  void calculate_inner_domain();
+
+ public:
+  FDMEulerImplicit(double _x_dom, unsigned long _J,
+                   double _t_dom, unsigned long _N,
+                   ConvectionDiffusionPDE* _pde);
+
+  void step_march();
+};
 #endif
