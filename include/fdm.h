@@ -3,6 +3,7 @@
 
 #include "../include/pde.h"
 #include <vector>
+#include <string> 
 
 // Finite Difference Method - Abstract Base Class
 class FDMBase {
@@ -11,7 +12,7 @@ class FDMBase {
 
   // Space discretisation
   double x_dom;      // Spatial extent [0.0, x_dom]
-  unsigned long J;   // Number of spatial differencing points
+  unsigned long M;   // Number of spatial differencing points
   double dx;         // Spatial step size (calculated from above)
   std::vector<double> x_values;  // Stores the coordinates of the x dimension
 
@@ -31,7 +32,7 @@ class FDMBase {
   std::vector<double> old_result;   // Old solution (becomes N)
 
   // Constructor
-  FDMBase(double _x_dom, unsigned long _J,
+  FDMBase(double _x_dom, unsigned long _M,
           double _t_dom, unsigned long _N,
           ConvectionDiffusionPDE* _pde);
 
@@ -44,7 +45,7 @@ class FDMBase {
 
  public:
   // Carry out the actual time-stepping
-  virtual void step_march() = 0;
+  virtual void step_march(std::string output_file) = 0;
 };
 
 class FDMEulerExplicit : public FDMBase {
@@ -55,11 +56,11 @@ class FDMEulerExplicit : public FDMBase {
   void calculate_inner_domain();
 
  public:
-  FDMEulerExplicit(double _x_dom, unsigned long _J,
+  FDMEulerExplicit(double _x_dom, unsigned long _M,
                    double _t_dom, unsigned long _N,
                    ConvectionDiffusionPDE* _pde);
 
-  void step_march();
+  void step_march(std::string output_file);
 };
 
 class FDMEulerImplicit : public FDMBase {
@@ -70,10 +71,10 @@ class FDMEulerImplicit : public FDMBase {
   void calculate_inner_domain();
 
  public:
-  FDMEulerImplicit(double _x_dom, unsigned long _J,
+  FDMEulerImplicit(double _x_dom, unsigned long _M,
                    double _t_dom, unsigned long _N,
                    ConvectionDiffusionPDE* _pde);
 
-  void step_march();
+  void step_march(std::string output_file);
 };
 #endif

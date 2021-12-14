@@ -22,10 +22,10 @@ int main(int argc, char **argv) {
 
   // Create the PDE and FDM objects
   BlackScholesPDE* bs_pde = new BlackScholesPDE(call_option);
-  FDMEulerExplicit fdm_euler(x_dom, J, t_dom, N, bs_pde);
+  FDMEulerImplicit fdm_euler(x_dom, J, t_dom, N, bs_pde);
 
   // Run the FDM solver
-  fdm_euler.step_march();
+  fdm_euler.step_march("fdm_implicit.csv");
 
   // Delete the PDE, PayOff and Option objects
   delete bs_pde;

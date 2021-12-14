@@ -2,24 +2,25 @@
 #define __FDM_CPP
 
 #include <fstream>
+#include <iostream>
 #include <functional>
 #include "../include/fdm.h"
 
-FDMBase::FDMBase(double _x_dom, unsigned long _J,
+FDMBase::FDMBase(double _x_dom, unsigned long _M,
                  double _t_dom, unsigned long _N,
                  ConvectionDiffusionPDE* _pde) 
-  : x_dom(_x_dom), J(_J), t_dom(_t_dom), N(_N), pde(_pde) {}
+  : x_dom(_x_dom), M(_M), t_dom(_t_dom), N(_N), pde(_pde) {}
 
-FDMEulerExplicit::FDMEulerExplicit(double _x_dom, unsigned long _J,
+FDMEulerExplicit::FDMEulerExplicit(double _x_dom, unsigned long _M,
                                    double _t_dom, unsigned long _N,
                                    ConvectionDiffusionPDE* _pde) 
-  : FDMBase(_x_dom, _J, _t_dom, _N, _pde) {
+  : FDMBase(_x_dom, _M, _t_dom, _N, _pde) {
   calculate_step_sizes();
   set_initial_conditions();
 }
 
 void FDMEulerExplicit::calculate_step_sizes() {
-  dx = x_dom/static_cast<double>(J-1);
+  dx = x_dom/static_cast<double>(M-1);
   dt = t_dom/static_cast<double>(N-1);
 }
 
@@ -27,14 +28,14 @@ void FDMEulerExplicit::set_initial_conditions() {
   // Spatial settings
   double cur_spot = 0.0;
 
-  old_result.resize(J, 0.0);
-  new_result.resize(J, 0.0);
-  x_values.resize(J, 0.0);
+  old_result.resize(M, 0.0);
+  new_result.resize(M, 0.0);
+  x_values.resize(M, 0.0);
 
-  for (unsigned long j=0; j<J; j++) {
-    cur_spot = static_cast<double>(j)*dx;
-    old_result[j] = pde->init_cond(cur_spot);
-    x_values[j] = cur_spot;
+  for (unsigned long m=0; m<M; m++) {
+    cur_spot = static_cast<double>(m)*dx;
+    old_result[m] = pde->init_cond(cur_spot);
+    x_values[m] = cur_spot;
   }
 
   // Temporal settings
@@ -44,38 +45,38 @@ void FDMEulerExplicit::set_initial_conditions() {
 
 void FDMEulerExplicit::calculate_boundary_conditions() {
   new_result[0] = pde->boundary_left(prev_t, x_values[0]);
-  new_result[J-1] = pde->boundary_right(prev_t, x_values[J-1]);
+  new_result[M-1] = pde->boundary_right(prev_t, x_values[M-1]);
 }
 
 void FDMEulerExplicit::calculate_inner_domain() {
-  // Only use inner result indices (1 to J-2)
-  for (unsigned long j=1; j<J-1; j++) {
+  // Only use inner result indices (1 to M-2)
+  for (unsigned long m=1; m<M-1; m++) {
     // Temporary variables used throughout
-    double dt_sig = dt * (pde->diff_coeff(prev_t, x_values[j]));
-    double dt_sig_2 = dt * dx * 0.5 * (pde->conv_coeff(prev_t, x_values[j]));
+    double dt_sig = dt * (pde->diff_coeff(prev_t, x_values[m]));
+    double dt_sig_2 = dt * dx * 0.5 * (pde->conv_coeff(prev_t, x_values[m]));
 
     // Differencing coefficients (see \alpha, \beta and \gamma in text)
     alpha = dt_sig - dt_sig_2;
-    beta = dx * dx - (2.0 * dt_sig) + (dt * dx * dx * (pde->zero_coeff(prev_t, x_values[j])));
+    beta = dx * dx - (2.0 * dt_sig) + (dt * dx * dx * (pde->zero_coeff(prev_t, x_values[m])));
     gamma = dt_sig + dt_sig_2;
 
     // Update inner values of spatial discretisation grid (Explicit Euler)
-    new_result[j] = ( (alpha * old_result[j-1]) + 
-                      (beta * old_result[j]) + 
-                      (gamma * old_result[j+1]) )/(dx*dx) - 
-      (dt*(pde->source_coeff(prev_t, x_values[j])));
+    new_result[m] = ( (alpha * old_result[m-1]) + 
+                      (beta * old_result[m]) + 
+                      (gamma * old_result[m+1]) )/(dx*dx) - 
+      (dt*(pde->source_coeff(prev_t, x_values[m])));
   }
 }
 
-void FDMEulerExplicit::step_march() { 
+void FDMEulerExplicit::step_march(std::string output_file) { 
   std::ofstream fdm_out("fdm.csv");
 
   while(cur_t < t_dom) {
     cur_t = prev_t + dt;
     calculate_boundary_conditions();
     calculate_inner_domain();
-    for (int j=0; j<J; j++) {
-      fdm_out << x_values[j] << " " << prev_t << " " << new_result[j] << std::endl;
+    for (int m=0; m<M; m++) {
+      fdm_out << x_values[m] << " " << prev_t << " " << new_result[m] << std::endl;
     }
     
     old_result = new_result;
@@ -92,54 +93,14 @@ void FDMEulerExplicit::step_march() {
 
 
 
-FDMEulerImplicit::FDMEulerImplicit(double _x_dom, unsigned long _J,
+FDMEulerImplicit::FDMEulerImplicit(double _x_dom, unsigned long _M,
                                    double _t_dom, unsigned long _N,
                                    ConvectionDiffusionPDE* _pde) 
-  : FDMBase(_x_dom, _J, _t_dom, _N, _pde) {
+  : FDMBase(_x_dom, _M, _t_dom, _N, _pde) {
   calculate_step_sizes();
   set_initial_conditions();
 }
 
-void FDMEulerImplicit::calculate_step_sizes() {
-  dx = x_dom/static_cast<double>(J-1);
-  dt = t_dom/static_cast<double>(N-1);
-}
-
-// TODO : renommer J en N psk J c'est dégueu
-void FDMEulerImplicit::set_initial_conditions() {
-  // Spatial settings
-  double cur_spot = 0.0;
-
-  old_result.resize(J, 0.0);
-  new_result.resize(J, 0.0);
-  x_values.resize(J, 0.0);
-
-  for (unsigned long j=0; j<J; j++) {
-    cur_spot = static_cast<double>(j)*dx;
-    old_result[j] = pde->init_cond(cur_spot);
-    x_values[j] = cur_spot;
-  }
-
-  // Temporal settings
-  prev_t = 0.0;
-  cur_t = 0.0;
-}
-
-void FDMEulerImplicit::calculate_boundary_conditions() {
-  // # balek absolu
-}
-
-void FDMEulerImplicit::calculate_inner_domain() {
-  compute_next_line(
-    x_values
-    , dx
-    , dt
-    , prev_t
-    , pde
-    , old_result
-    , new_result
-  );
-}
 
 // Diagonal coefficients of the tridiagonal matrix A in implicit resolution
 double compute_d(size_t n, double a, double b) {
@@ -164,42 +125,42 @@ double compute_l(size_t n, double a, double b) {
 // TODO : maybe wrap the three functions in a Tridiagonal class for more clarity
 
 // /!\ TODO : in the paper, indices of solution go from 1 to N-1...
-std::vector<double> & Thomas_solver(const std::vector<double>& l, const std::vector<double>& d, const std::vector<double>& u, const std::vector<double> & b, std::vector<double>result, size_t begin_result, size_t end_result) {
-  size_t n = end_result - begin_result;
-  
+std::vector<double> & Thomas_solver(const std::vector<double>& l, const std::vector<double>& d, const std::vector<double>& u, const std::vector<double> & b, std::vector<double> & result, size_t begin_result, size_t end_result) {
+  size_t n = end_result - begin_result + 1;
+
   // cprime and dprime vectors are essential coefficients to Thomas' algorithm
   std::vector<double> cprime(n);
   std::vector<double> dprime(n);
 
-  cprime[0] = u.at(1) / d.at(1);
-  dprime[0] = b.at(0) / d.at(1);
+  cprime.at(0) = u.at(0) / d.at(0);
+  dprime.at(0) = b.at(0) / d.at(0);
 
-  for (size_t i = 1; i < n - 1; i++) {
-    // /!\ the indices for the current values of some variables start at 1 instead of 0 (or maybe not xD)
-    double u_curr = u.at(i+1);
-    double d_curr = d.at(i+1);
-    double l_curr = l.at(i+1);
-    double b_curr = b.at(i+1);
+  for (size_t i = 1; i < n; i++) {
+    // still unsure about indices
+    double u_curr = u.at(i);
+    double d_curr = d.at(i);
+    double l_curr = l.at(i);
+    double b_curr = b.at(i);
 
-    cprime[i] = u_curr / (
-      d_curr - l_curr * cprime[i-1]
+    cprime.at(i) = u_curr / (
+      d_curr - l_curr * cprime.at(i-1)
     );
 
-    dprime[i] = (
-      b_curr - l_curr * dprime[i-1]
+    dprime.at(i) = (
+      b_curr - l_curr * dprime.at(i-1)
     ) / (
-      d_curr - l_curr * cprime[i-1]
+      d_curr - l_curr * cprime.at(i-1)
     );
   }
 
   // now solve the linear equation by finding x such that A x = b
   // TODO : we may replace at by [] for optimisation (at is safer because out of bounds is checked)
-  result.at(end_result) = dprime[n-1];
+  result.at(end_result) = dprime.at(n-1);
 
   for (size_t i = end_result - 1; i >= begin_result; i--)  
   {
     double x_next = result.at(i+1);
-    double x_curr = dprime[i] - cprime[i] * x_next;
+    double x_curr = dprime.at(i) - cprime.at(i) * x_next;
 
     result.at(i) = x_curr;
   }
@@ -208,23 +169,30 @@ std::vector<double> & Thomas_solver(const std::vector<double>& l, const std::vec
 }
 
 std::vector<double> compute_b(std::vector<double> & old_result, double new_result_0, double new_result_N, double l0, double uN) {
-  size_t n = old_result.size() - 2; // remove terms of index 0 and N
+  size_t N = old_result.size() - 1;
+  size_t size_b = N - 1; // b indices theoretically range from 1 to N-1
 
-  std::vector<double> b(old_result); // calls the copy constructor
+  std::vector<double> b(size_b); // calls the copy constructor
+  //std::vector<double> b(n);
 
-  b.erase(b.end());
-  b.erase(b.begin());
+  for (size_t n = 1; n <= size_b; n++) {
+    b.at(n-1) = old_result.at(n);
+  }
 
+  //b.erase(b.end());
+  //b.erase(b.begin());
+
+/*
   b.at(0) -= l0 * new_result_0;
   b.at(n-1) -= uN * new_result_N;
-
+*/
   return b;
 }
 
-std::vector<double> & calculate_boundary_conditions(double prev_t, std::vector<double> x_values, ConvectionDiffusionPDE * pde, std::vector<double> new_result) {
+std::vector<double> & store_boundary_conditions(double prev_t, std::vector<double> & x_values, ConvectionDiffusionPDE * pde, std::vector<double> & new_result) {
   size_t N = new_result.size() - 1;
-  new_result[0] = pde->boundary_left(prev_t, x_values[0]);
-  new_result[N-1] = pde->boundary_right(prev_t, x_values[N-1]);
+  new_result.at(0) = pde->boundary_left(prev_t, x_values[0]);
+  new_result.at(N-1) = pde->boundary_right(prev_t, x_values[N-1]);
 
   return new_result; // return the reference to the result array in case we need to affect it to a variable
 }
@@ -233,58 +201,103 @@ std::vector<double> & calculate_boundary_conditions(double prev_t, std::vector<d
 std::vector<double> & compute_next_line(std::vector<double> & x_values, double dx, double dt, double prev_t, ConvectionDiffusionPDE * pde, std::vector<double> & old_result, std::vector<double> & new_result) {
   size_t N = new_result.size() - 1; // results range from 0 to N
 
-  calculate_boundary_conditions(prev_t, x_values, pde, new_result);
+  // store_boundary_conditions(prev_t, x_values, pde, new_result);
 
   // Define alpha, beta, d, u, l
-  std::vector<double> alpha(N-2);
-  std::vector<double> beta(N-2);
-  std::vector<double> gamma(N-2);
+  std::vector<double> upper(N-1); //indices range from 1 to N-1
+  std::vector<double> diagonal(N-1);
+  std::vector<double> lower(N-1);
 
   double a_coeff = 2.0 * pde->diff_coeff(prev_t, 1) * dt;
   double b_coeff = pde->conv_coeff(prev_t, 1) * dt;
   
-  // Only use inner result indices (1 to J-2)
-  for (size_t j=1; j<N-1; j++) {
-    gamma.at(j-1) = compute_l(j, a_coeff, b_coeff);
-    beta.at(j-1) = compute_d(j, a_coeff, b_coeff);
-    alpha.at(j-1) = compute_u(j, a_coeff, b_coeff);
+  // Only use inner result indices (1 to M-1)
+  for (size_t m = 0; m <= N-2; m++) {
+    lower.at(m) = compute_l(m, a_coeff, b_coeff); // l indices go from 0 to N-2
   }
-    // I keep this just in case, TODO: delete later
-    // // Temporary variables used throughout
-    // double dt_sig = dt * (pde->diff_coeff(prev_t, j)); // = sigma² * j² * dt / 2 for Black Scholes
-    // double dt_sig_2 = dt * 0.5 * (pde->conv_coeff(prev_t, j)); // = r * j * dt / 2 for Black Scholes
 
-    // // Differencing coefficients (see \alpha, \beta and \gamma in text)
-    // alpha.at(j) = dt_sig - dt_sig_2;
-    // beta.at(j) = 1 - (2.0 * dt_sig) + (dt * (pde->zero_coeff(prev_t, j))); // = 1 - sigma² * j¹ * dt - r * dt for Black Scholes
-    // gamma.at(j) = dt_sig + dt_sig_2;
+  for (size_t m=1; m <= N-1; m++) {
+    diagonal.at(m-1) = compute_d(m, a_coeff, b_coeff); // d indices go from 1 to N-1
+  }
 
+  for (size_t m=2; m <= N; m++) {
+    upper.at(m-2) = compute_u(m, a_coeff, b_coeff); // u indices go from 2 to N
+  }
 
 
   // Define vector b
-  std::vector<double> b = compute_b(old_result, new_result[0], new_result[N], compute_l(0, a_coeff, b_coeff), compute_u(N, a_coeff, b_coeff));
+  std::vector<double> b = compute_b(old_result, new_result.at(0), new_result.at(N), compute_l(0, a_coeff, b_coeff), compute_u(N, a_coeff, b_coeff));
  
   // Solve A v = b
-  Thomas_solver(gamma, beta, alpha, b, new_result, 1, N-1);
+  Thomas_solver(lower, diagonal, upper, b, new_result, 1, N-1);
   
   // Set result value equal to v
   return new_result; // return the reference to the result array in case we need to affect it to a variable
 
 }
 
-void FDMEulerImplicit::step_march() { 
-  std::ofstream fdm_out("fdm.csv");
+void FDMEulerImplicit::calculate_step_sizes() {
+  dx = x_dom/static_cast<double>(M-1);
+  dt = t_dom/static_cast<double>(N-1);
+}
 
-  while(cur_t < t_dom) {
-    cur_t = prev_t + dt;
-    calculate_boundary_conditions();
-    calculate_inner_domain();
-    for (int j=0; j<J; j++) {
-      fdm_out << x_values[j] << " " << prev_t << " " << new_result[j] << std::endl;
+void FDMEulerImplicit::set_initial_conditions() {
+  // Spatial settings
+  double cur_spot = 0.0;
+
+  this->old_result.resize(M, 0.0);
+  this->new_result.resize(M, 0.0);
+  this->x_values.resize(M, 0.0);
+
+  for (unsigned long m=0; m<M; m++) {
+    cur_spot = static_cast<double>(m)*dx;
+    this->old_result.at(m) = pde->init_cond(cur_spot);
+    this->x_values.at(m) = cur_spot;
+  }
+
+  // Temporal settings
+  this->prev_t = 0.0;
+  this->cur_t = 0.0;
+}
+
+void FDMEulerImplicit::calculate_boundary_conditions() {
+  store_boundary_conditions(
+    this->prev_t
+    , this->x_values
+    , this->pde
+    , this->new_result
+  );
+}
+
+void FDMEulerImplicit::calculate_inner_domain() {
+  compute_next_line(
+    this->x_values
+    , this->dx
+    , this->dt
+    , this->prev_t
+    , this->pde
+    , this->old_result
+    , this->new_result
+  );
+}
+
+
+/*
+  * Solve the PDE for all time steps and space steps
+*/
+void FDMEulerImplicit::step_march(std::string output_file) { 
+  std::ofstream fdm_out(output_file);
+
+  while(this->cur_t < this->t_dom) {
+    this->cur_t = this->prev_t + dt;
+    this->calculate_boundary_conditions();
+    this->calculate_inner_domain();
+    for (int m=0; m<M; m++) {
+      fdm_out << this->x_values.at(m) << " " << this->prev_t << " " << this->new_result.at(m) << std::endl;
     }
     
-    old_result = new_result;
-    prev_t = cur_t;
+    this->old_result = this->new_result;
+    this->prev_t = this->cur_t;
   }
 
   fdm_out.close();
