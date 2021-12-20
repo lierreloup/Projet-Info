@@ -2,6 +2,7 @@
 #include "../include/option.h"
 #include "../include/pde.h"
 #include "../include/fdm.h"
+#include "../include/pricers.h"
 
 int main(int argc, char **argv) {
   // Create the option parameters
@@ -11,8 +12,8 @@ int main(int argc, char **argv) {
   double T = 1.00;    // One year until expiry
 
   // FDM discretisation parameters
-  double x_dom = 1.0;       // Spot goes from [0.0, 1.0]
-  unsigned long M = 20; // TODO : pourquoi le csv contient trois chiffres par ligne et pas 20 ?
+  double x_dom = 40*K;       // Spot goes from [0.0, 1.0]
+  unsigned long M = 2000;
   double t_dom = T;         // Time period as for the option
   unsigned long N = 20;     
 
@@ -25,7 +26,10 @@ int main(int argc, char **argv) {
   FDMEulerImplicit fdm_euler(x_dom, M, t_dom, N, bs_pde);
 
   // Run the FDM solver
-  fdm_euler.step_march("fdm_implicit.csv");
+  fdm_euler.step_march("call_fdm_implicit.csv");
+
+  // Compute Put Price
+  getPutPricesFromCallFile("call_fdm_implicit.csv", T, r, K, "put_fdm_implicit");
 
   // Delete the PDE, PayOff and Option objects
   delete bs_pde;

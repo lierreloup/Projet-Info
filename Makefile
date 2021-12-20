@@ -15,5 +15,8 @@ obj/payoff.o : src/payoff.cpp include/payoff.h
 obj/pde.o : src/pde.cpp include/pde.h include/option.h
 	$(CCO) $< -o $@
 
-bin/price : obj/pde.o obj/payoff.o obj/option.o obj/fdm.o src/main.cpp
+obj/pricers.o : src/pricers.cpp
+	$(CCO) $< -o $@
+
+bin/price : obj/pde.o obj/payoff.o obj/option.o obj/fdm.o obj/pricers.o src/main.cpp 
 	$(CC) $^ -o bin/price

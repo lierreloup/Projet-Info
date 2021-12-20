@@ -16,22 +16,22 @@
  * @param rate 
  * @param strike 
  */
-double getPutPriceFromCallPrice(double call_price, double spot, double time, double rate, double strike) {
-    return call_price - spot + exp(-rate * time) * strike;
+double getPutPriceFromCallPrice(double call_price, double spot, double time, double maturity, double rate, double strike) {
+    return call_price - spot + exp(-rate * (maturity - time)) * strike;
 }
 
-void getPutPricesFromCallFile(std::string call_prices_file, double spot, double time, double rate, double strike, std::string output_file) {
+void getPutPricesFromCallFile(std::string call_prices_file, double maturity, double rate, double strike, std::string output_file) {
     std::fstream call_prices_stream(call_prices_file, std::ios::in);
     std::ofstream put_out(output_file);
 
     while(call_prices_stream) {
         double spot, time, call_price;           
 
-        for (size_t i = 0; i < 3; i++) {
-            call_prices_stream >> spot >> time >> call_price;    
-        }
+        call_prices_stream >> spot >> time >> call_price;    
 
-        double put_price = getPutPriceFromCallPrice(call_price, spot, time, rate, strike);
+        double put_price = getPutPriceFromCallPrice(call_price, spot, time, maturity, rate, strike);
         put_out << spot << ' ' << time << ' ' << put_price << std::endl;
     }
+
+    put_out.close();
 }
