@@ -1,4 +1,5 @@
 * price puts instead of calls
 * price american options
+* greeks
 * take input from excel/vba
 * give output to excel/vba

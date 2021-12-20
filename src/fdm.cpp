@@ -289,10 +289,11 @@ void FDMEulerImplicit::step_march(std::string output_file) {
   std::ofstream fdm_out(output_file);
 
   while(this->cur_t < this->t_dom) {
-    this->cur_t = this->prev_t + dt;
+    this->cur_t = this->prev_t + this->dt;
     this->calculate_boundary_conditions();
     this->calculate_inner_domain();
-    for (int m=0; m<M; m++) {
+    for (int m=0; m<this->M; m++) {
+      //store x, t and price in a new line of the file
       fdm_out << this->x_values.at(m) << " " << this->prev_t << " " << this->new_result.at(m) << std::endl;
     }
     

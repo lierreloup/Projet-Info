@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
 
   // FDM discretisation parameters
   double x_dom = 1.0;       // Spot goes from [0.0, 1.0]
-  unsigned long J = 20; 
+  unsigned long M = 20; // TODO : pourquoi le csv contient trois chiffres par ligne et pas 20 ?
   double t_dom = T;         // Time period as for the option
   unsigned long N = 20;     
 
@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
 
   // Create the PDE and FDM objects
   BlackScholesPDE* bs_pde = new BlackScholesPDE(call_option);
-  FDMEulerImplicit fdm_euler(x_dom, J, t_dom, N, bs_pde);
+  FDMEulerImplicit fdm_euler(x_dom, M, t_dom, N, bs_pde);
 
   // Run the FDM solver
   fdm_euler.step_march("fdm_implicit.csv");
