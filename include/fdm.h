@@ -77,4 +77,22 @@ class FDMEulerImplicit : public FDMBase {
 
   void step_march(std::string output_file);
 };
+
+struct AmericanOptionParameters {
+  BlackScholesPDE * no_early_exercise_pde;
+};
+
+class PriceAmericanOption : public FDMBase {
+  void calculate_step_sizes();
+  void set_initial_conditions();
+  void calculate_boundary_conditions();
+  void calculate_inner_domain();
+
+ public:
+  PriceAmericanOption(double _x_dom, unsigned long _M,
+                   double _t_dom, unsigned long _N,
+                   AmericanOptionParameters params);
+
+  void step_march(std::string output_file);
+};
 #endif

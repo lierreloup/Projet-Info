@@ -1,5 +1,5 @@
-* price puts instead of calls
-* price american options
-* greeks
+* price puts instead of calls (todo : make with PDE instead of call put parity cuz call put parity looks weird close to boundaries)
+* price american options (method from american_options_simple_method) (how to make a non uniform time grid ?)
+* greeks (just read values vi+1, vi from the csv files and compute (vi+1 - vi) / delta)
 * take input from excel/vba
 * give output to excel/vba

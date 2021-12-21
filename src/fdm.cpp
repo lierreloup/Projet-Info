@@ -241,6 +241,7 @@ void FDMEulerImplicit::calculate_step_sizes() {
   dt = t_dom/static_cast<double>(N-1);
 }
 
+// TO MAKE THIS GENERIC : use pointers/const refs/setters
 void FDMEulerImplicit::set_initial_conditions() {
   // Spatial settings
   double cur_spot = 0.0;
@@ -303,6 +304,112 @@ void FDMEulerImplicit::step_march(std::string output_file) {
 
   fdm_out.close();
 }
+
+  void PriceAmericanOption::calculate_step_sizes() {
+    dx = x_dom/static_cast<double>(M-1);
+    dt = t_dom/static_cast<double>(N-1);
+  }
+
+  void PriceAmericanOption::set_initial_conditions() {
+    // Spatial settings
+    double cur_spot = 0.0;
+
+    this->old_result.resize(M, 0.0);
+    this->new_result.resize(M, 0.0);
+    this->x_values.resize(M, 0.0);
+
+    for (unsigned long m=0; m<M; m++) {
+      cur_spot = static_cast<double>(m)*dx;
+      this->old_result.at(m) = pde->init_cond(cur_spot);
+      this->x_values.at(m) = cur_spot;
+    }
+
+    // Temporal settings
+    this->prev_t = 0.0;
+    this->cur_t = 0.0;
+  }
+
+  //TODO : check
+  void PriceAmericanOption::calculate_boundary_conditions() {
+    store_boundary_conditions(
+      this->prev_t
+      , this->x_values
+      , this->pde
+      , this->new_result
+    );
+  }
+
+  //calculate line exactly like european option, then check if Vm+1 - Vm strictly greater than 0 (in which case set to 0)
+  std::vector<double> & increment_american_price(std::vector<double> & x_values, double dx, double dt, double prev_t, ConvectionDiffusionPDE * pde, std::vector<double> & old_result, std::vector<double> & new_result) {
+    compute_next_line(
+      x_values
+      , dx
+      , dt
+      , prev_t
+      , pde
+      , old_result
+      , new_result
+    );
+
+    size_t N = new_result.size();
+
+    // We use the Horng-Tien method to compute American Option prices
+    // That is, if the time derivative is strictly greater than 0, set it to 0
+    for (int n = 0; n < N; n++) {
+      try
+      {
+        double time_derivative_times_dt = new_result.at(n) - old_result.at(n);
+        if (time_derivative_times_dt > 0) {
+          new_result[n] = 0;
+        }
+      }
+      catch(const std::exception& e)
+      {
+        std::cerr << "increment_american_price : " << e.what() << '\n';
+      }
+      
+    }
+
+    return new_result;
+  }
+
+  void PriceAmericanOption::calculate_inner_domain() {
+    increment_american_price(
+      this->x_values
+      , this->dx
+      , this->dt
+      , this->prev_t
+      , this->pde
+      , this->old_result
+      , this->new_result
+    );
+  }
+
+  PriceAmericanOption::PriceAmericanOption(double _x_dom, unsigned long _M, double _t_dom, unsigned long _N, AmericanOptionParameters params) 
+  : FDMBase(_x_dom, _M, _t_dom, _N, params.no_early_exercise_pde)
+  {
+    calculate_step_sizes();
+    set_initial_conditions();
+  }
+
+  void PriceAmericanOption::step_march(std::string output_file) {
+    std::ofstream fdm_out(output_file);
+
+    while(this->cur_t < this->t_dom) {
+      this->cur_t = this->prev_t + this->dt;
+      this->calculate_boundary_conditions();
+      this->calculate_inner_domain();
+      for (int m=0; m<this->M; m++) {
+        //store x, t and price in a new line of the file
+        fdm_out << this->x_values.at(m) << " " << this->prev_t << " " << this->new_result.at(m) << std::endl;
+      }
+      
+      this->old_result = this->new_result;
+      this->prev_t = this->cur_t;
+    }
+
+    fdm_out.close();
+  }
 
 
 #endif

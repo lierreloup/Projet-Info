@@ -23,13 +23,19 @@ int main(int argc, char **argv) {
 
   // Create the PDE and FDM objects
   BlackScholesPDE* bs_pde = new BlackScholesPDE(call_option);
-  FDMEulerImplicit fdm_euler(x_dom, M, t_dom, N, bs_pde);
+  //FDMEulerImplicit fdm_euler(x_dom, M, t_dom, N, bs_pde);
+
+  AmericanOptionParameters call_params;
+  call_params.no_early_exercise_pde = bs_pde;
+
+  PriceAmericanOption price(x_dom, M, t_dom, N, call_params);
 
   // Run the FDM solver
-  fdm_euler.step_march("call_fdm_implicit.csv");
+  //fdm_euler.step_march("call_fdm_implicit.csv");
+  price.step_march("america.csv");
 
   // Compute Put Price
-  getPutPricesFromCallFile("call_fdm_implicit.csv", T, r, K, "put_fdm_implicit");
+  //getPutPricesFromCallFile("call_fdm_implicit.csv", T, r, K, "put_fdm_implicit");
 
   // Delete the PDE, PayOff and Option objects
   delete bs_pde;
