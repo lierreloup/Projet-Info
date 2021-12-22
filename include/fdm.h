@@ -63,6 +63,9 @@ class FDMEulerExplicit : public FDMBase {
   void step_march(std::string output_file);
 };
 
+// TODO : rather than take a pde as argument, take a european option and create a BS for it
+// TODO : remove most of methods
+
 class FDMEulerImplicit : public FDMBase {
  protected:
   void calculate_step_sizes();

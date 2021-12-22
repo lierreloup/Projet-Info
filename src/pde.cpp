@@ -3,6 +3,7 @@
 
 #include "../include/pde.h"
 #include <math.h>
+#include <iostream>
 
 BlackScholesPDE::BlackScholesPDE(VanillaOption* _option) : option(_option) {}
 
@@ -27,20 +28,26 @@ double BlackScholesPDE::source_coeff(double t, double x) const {
   return 0.0;
 }
 
-// Left boundary-condition (vanilla call option)
+// Left boundary-condition 
 double BlackScholesPDE::boundary_left(double t, double x) const {
-  return 0.0;  // Specifically for a CALL option
+  return this->option->option_price_for_0_spot(t);
+  //return 0.0;  // Specifically for a CALL option
 }
 
-// Right boundary-condition (vanilla call option)
+// Right boundary-condition 
 double BlackScholesPDE::boundary_right(double t, double x) const {
+  std::cout << "time to mat " << t << " spot " << x << " boundary right " << this->option->option_price_for_big_spot(t, x) << std::endl;
+  return this->option->option_price_for_big_spot(t, x);
   // This is via Put-Call Parity and works for a call option
-  return (x-(option->K)*exp(-(option->r)*((option->T)-t))); 
+  //return (x-(option->K)*exp(-(option->r)*((option->T)-t))); 
 }
 
-// Initial condition (vanilla call option)
+// Initial condition 
 double BlackScholesPDE::init_cond(double x) const {
-  return option->pay_off->operator()(x);
+  double res = this->option->option_price_at_maturity(x);
+  //std::cout << "spot " << x << " payoff " << res << std::endl;
+  return res;
+  //return option->pay_off->operator()(x);
 }
 
 #endif

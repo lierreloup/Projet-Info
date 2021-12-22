@@ -1,3 +1,5 @@
+!!! t is not the time but the TIME TO MATURITY -> change call put parity
+
 * price puts instead of calls (todo : make with PDE instead of call put parity cuz call put parity looks weird close to boundaries)
 * price american options (method from american_options_simple_method) (how to make a non uniform time grid ?)
 * greeks (just read values vi+1, vi from the csv files and compute (vi+1 - vi) / delta)

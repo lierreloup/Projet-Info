@@ -125,111 +125,143 @@ double compute_l(size_t n, double a, double b) {
 // TODO : maybe wrap the three functions in a Tridiagonal class for more clarity
 
 // /!\ TODO : in the paper, indices of solution go from 1 to N-1...
-std::vector<double> & Thomas_solver(const std::vector<double>& l, const std::vector<double>& d, const std::vector<double>& u, const std::vector<double> & b, std::vector<double> & result, size_t begin_result, size_t end_result) {
-  size_t n = end_result - begin_result + 1;
+std::vector<double> & Thomas_solver(const std::vector<double>& lower, const std::vector<double>& diagonal, const std::vector<double>& upper, const std::vector<double> & right_side, std::vector<double> & result, size_t begin_result, size_t end_result) {
+  try
+  {  
+  size_t diagonal_size = end_result - begin_result + 1;
 
   // cprime and dprime vectors are essential coefficients to Thomas' algorithm
-  std::vector<double> cprime(n);
-  std::vector<double> dprime(n);
+  std::vector<double> cprime(diagonal_size);
+  std::vector<double> dprime(diagonal_size);
 
-  cprime.at(0) = u.at(0) / d.at(0);
-  dprime.at(0) = b.at(0) / d.at(0);
+  cprime.at(0) = upper.at(0) / diagonal.at(0);
+  dprime.at(0) = right_side.at(0) / diagonal.at(0);
 
-  for (size_t i = 1; i < n; i++) {
-    // still unsure about indices
-    double u_curr = u.at(i);
-    double d_curr = d.at(i);
-    double l_curr = l.at(i);
-    double b_curr = b.at(i);
+  for (size_t i = 1; i < diagonal_size - 1; i++) {
+    std::cout << i << " diagonal " << diagonal_size << std::endl;
+    // to avoid getting a headache, coefficients are named like in the wikipedia page https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
+    // even though Wikipedia indices range from 1 to n, ours range from 0 to diagonal_size - 1
+    double ci = upper.at(i);
+    double bi = diagonal.at(i);
+    double ai = lower.at(i-1);
+    double di = right_side.at(i);
 
-    cprime.at(i) = u_curr / (
-      d_curr - l_curr * cprime.at(i-1)
+    // I wrote fractions on two lines so that they can be read as fractions
+    cprime.at(i) = ci / (
+      bi - ai * cprime.at(i-1)
     );
 
     dprime.at(i) = (
-      b_curr - l_curr * dprime.at(i-1)
+      di - ai * dprime.at(i-1)
     ) / (
-      d_curr - l_curr * cprime.at(i-1)
+      bi - ai * cprime.at(i-1)
     );
   }
 
-  // now solve the linear equation by finding x such that A x = b
-  // TODO : we may replace at by [] for optimisation (at is safer because out of bounds is checked)
-  result.at(end_result) = dprime.at(n-1);
+  double bi = diagonal.at(diagonal_size - 1);
+  double ai = lower.at(diagonal_size-2);
+  double di = right_side.at(diagonal_size - 1);
 
-  for (size_t i = end_result - 1; i >= begin_result; i--)  
+  dprime.at(diagonal_size - 1) = (
+    di - ai * dprime.at(diagonal_size - 2)
+  ) / (
+    bi - ai * cprime.at(diagonal_size - 2)
+  );
+
+  std::cout << "after loop";
+  // now solve the linear equation by finding x such that A x = b
+  result.at(end_result) = dprime.at(diagonal_size-1);
+  std::cout << "after end result";
+
+  size_t i = diagonal_size - 2;
+  for (size_t result_index = end_result - 1; result_index >= begin_result; result_index--)  
   {
-    double x_next = result.at(i+1);
+
+    double x_next = result.at(result_index+1);
     double x_curr = dprime.at(i) - cprime.at(i) * x_next;
 
-    result.at(i) = x_curr;
+    result.at(result_index) = x_curr;
+    i --;
   }
 
   return result;
+
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << "Thomas solver " << e.what() << '\n';
+    throw e;
+  }
 }
 
-std::vector<double> compute_b(std::vector<double> & old_result, double new_result_0, double new_result_N, double l0, double uN) {
-  size_t N = old_result.size() - 1;
-  size_t size_b = N - 1; // b indices theoretically range from 1 to N-1
+std::vector<double> compute_b(std::vector<double> & old_result, double new_result_0, double new_result_M, double l0, double uM) {
+  try
+  {
+  size_t M = old_result.size() - 1;
+  size_t size_b = M - 1; // b indices in the paper range from 1 to M-1
 
-  std::vector<double> b(size_b); // calls the copy constructor
-  //std::vector<double> b(n);
+  std::vector<double> b(size_b);
 
-  for (size_t n = 1; n <= size_b; n++) {
-    b.at(n-1) = old_result.at(n);
+  for (size_t m = 1; m <= size_b; m++) {
+    b.at(m-1) = old_result.at(m);
   }
 
-  //b.erase(b.end());
-  //b.erase(b.begin());
-
-/*
   b.at(0) -= l0 * new_result_0;
-  b.at(n-1) -= uN * new_result_N;
-*/
+  b.at(size_b-1) -= uM * new_result_M;
+
   return b;
+
+  }
+
+  catch(const std::exception& e)
+  {
+    std::cerr << "compute_b : " << e.what() << '\n';
+    throw e;
+  }
 }
 
 std::vector<double> & store_boundary_conditions(double prev_t, std::vector<double> & x_values, ConvectionDiffusionPDE * pde, std::vector<double> & new_result) {
-  size_t N = new_result.size() - 1;
+  size_t M = new_result.size() - 1;
   new_result.at(0) = pde->boundary_left(prev_t, x_values[0]);
-  new_result.at(N-1) = pde->boundary_right(prev_t, x_values[N-1]);
+  new_result.at(M) = pde->boundary_right(prev_t, x_values[M]);
 
   return new_result; // return the reference to the result array in case we need to affect it to a variable
 }
 
 // TODO : maybe rename "implicit Euler" as "BSImplicitEuler" because the scheme does'nt work for all convection PDEs
 std::vector<double> & compute_next_line(std::vector<double> & x_values, double dx, double dt, double prev_t, ConvectionDiffusionPDE * pde, std::vector<double> & old_result, std::vector<double> & new_result) {
-  size_t N = new_result.size() - 1; // results range from 0 to N
+  size_t M = new_result.size() - 1; // results range from 0 to N
 
   // store_boundary_conditions(prev_t, x_values, pde, new_result);
 
   // Define alpha, beta, d, u, l
-  std::vector<double> upper(N-1); //indices range from 1 to N-1
-  std::vector<double> diagonal(N-1);
-  std::vector<double> lower(N-1);
+  // in the paper, M is called N
+  std::vector<double> upper(M-2); //in the paper, indices range from 2 to M
+  std::vector<double> diagonal(M-1); //in the paper, indices range from 1 to M-1
+  std::vector<double> lower(M-2); //in the paper, indices range from 0 to M-2
 
-  double a_coeff = 2.0 * pde->diff_coeff(prev_t, 1) * dt;
-  double b_coeff = pde->conv_coeff(prev_t, 1) * dt;
+  double a_coeff = 2.0 * pde->diff_coeff(prev_t, 1) * dt; // this equals sigma² * dt
+  double b_coeff = pde->conv_coeff(prev_t, 1) * dt; // this equals r * dt
   
   // Only use inner result indices (1 to M-1)
-  for (size_t m = 0; m <= N-2; m++) {
-    lower.at(m) = compute_l(m, a_coeff, b_coeff); // l indices go from 0 to N-2
+  for (size_t m = 1; m <= M-2; m++) {
+    lower.at(m-1) = compute_l(m, a_coeff, b_coeff); // l indices go from 0 to M-2
   }
 
-  for (size_t m=1; m <= N-1; m++) {
-    diagonal.at(m-1) = compute_d(m, a_coeff, b_coeff); // d indices go from 1 to N-1
+  for (size_t m=1; m <= M-1; m++) {
+    diagonal.at(m-1) = compute_d(m, a_coeff, b_coeff); // d indices go from 1 to M-1
   }
 
-  for (size_t m=2; m <= N; m++) {
-    upper.at(m-2) = compute_u(m, a_coeff, b_coeff); // u indices go from 2 to N
+  for (size_t m=2; m <= M-1; m++) {
+    upper.at(m-2) = compute_u(m, a_coeff, b_coeff); // u indices go from 2 to M-1
   }
 
 
   // Define vector b
-  std::vector<double> b = compute_b(old_result, new_result.at(0), new_result.at(N), compute_l(0, a_coeff, b_coeff), compute_u(N, a_coeff, b_coeff));
+  std::vector<double> b = compute_b(old_result, new_result.at(0), new_result.at(M), compute_l(0, a_coeff, b_coeff), compute_u(M, a_coeff, b_coeff));
  
   // Solve A v = b
-  Thomas_solver(lower, diagonal, upper, b, new_result, 1, N-1);
+  Thomas_solver(lower, diagonal, upper, b, new_result, 1, M-1);
   
   // Set result value equal to v
   return new_result; // return the reference to the result array in case we need to affect it to a variable
@@ -237,8 +269,8 @@ std::vector<double> & compute_next_line(std::vector<double> & x_values, double d
 }
 
 void FDMEulerImplicit::calculate_step_sizes() {
-  dx = x_dom/static_cast<double>(M-1);
-  dt = t_dom/static_cast<double>(N-1);
+  dx = x_dom/static_cast<double>(M);
+  dt = t_dom/static_cast<double>(N);
 }
 
 // TO MAKE THIS GENERIC : use pointers/const refs/setters
@@ -246,19 +278,20 @@ void FDMEulerImplicit::set_initial_conditions() {
   // Spatial settings
   double cur_spot = 0.0;
 
-  this->old_result.resize(M, 0.0);
-  this->new_result.resize(M, 0.0);
-  this->x_values.resize(M, 0.0);
+  this->old_result.resize(M+1, 0.0);
+  this->new_result.resize(M+1, 0.0);
+  this->x_values.resize(M+1, 0.0);
 
-  for (unsigned long m=0; m<M; m++) {
+  for (size_t m=0; m <= M; m++) {
     cur_spot = static_cast<double>(m)*dx;
+    std::cout << "m " << m << " cur_spot " << cur_spot << " dx " << dx << std::endl;
     this->old_result.at(m) = pde->init_cond(cur_spot);
     this->x_values.at(m) = cur_spot;
   }
 
-  // Temporal settings
-  this->prev_t = 0.0;
-  this->cur_t = 0.0;
+  // Temporal settings TODO : IS THIS TIME TO MAT OR TIME
+  this->prev_t = 0;
+  this->cur_t = 0;
 }
 
 void FDMEulerImplicit::calculate_boundary_conditions() {
@@ -286,16 +319,25 @@ void FDMEulerImplicit::calculate_inner_domain() {
 /*
   * Solve the PDE for all time steps and space steps
 */
-void FDMEulerImplicit::step_march(std::string output_file) { 
+void FDMEulerImplicit::step_march(std::string output_file) {
+  try
+  {
+ 
   std::ofstream fdm_out(output_file);
 
-  while(this->cur_t < this->t_dom) {
+  for (int m=0; m <= this->M; m++) {
+    fdm_out << this->x_values.at(m) << " " << this->cur_t << " " << this->old_result.at(m) << std::endl;
+  }
+  
+  double upper_time = this->t_dom - dt;
+  while(this->prev_t <= upper_time) {
     this->cur_t = this->prev_t + this->dt;
     this->calculate_boundary_conditions();
     this->calculate_inner_domain();
-    for (int m=0; m<this->M; m++) {
+    for (int m=0; m <= this->M; m++) {
       //store x, t and price in a new line of the file
-      fdm_out << this->x_values.at(m) << " " << this->prev_t << " " << this->new_result.at(m) << std::endl;
+      // TODO : why prev_t ?
+      fdm_out << this->x_values.at(m) << " " << this->cur_t << " " << this->new_result.at(m) << std::endl;
     }
     
     this->old_result = this->new_result;
@@ -303,6 +345,14 @@ void FDMEulerImplicit::step_march(std::string output_file) {
   }
 
   fdm_out.close();
+  }
+
+  catch(const std::exception& e)
+  {
+    std::cerr << "Euler Implicit step_march : " << e.what() << '\n';
+    throw e;
+  }
+ 
 }
 
   void PriceAmericanOption::calculate_step_sizes() {
@@ -395,7 +445,8 @@ void FDMEulerImplicit::step_march(std::string output_file) {
   void PriceAmericanOption::step_march(std::string output_file) {
     std::ofstream fdm_out(output_file);
 
-    while(this->cur_t < this->t_dom) {
+    double upper_time = this->t_dom - dt;
+    while(this->prev_t <= upper_time) {
       this->cur_t = this->prev_t + this->dt;
       this->calculate_boundary_conditions();
       this->calculate_inner_domain();
