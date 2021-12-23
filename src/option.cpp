@@ -3,27 +3,18 @@
 
 #include "../include/option.h"
 #include <math.h>
-#include "../include/payoff.h"
 #include <iostream>
 
-VanillaOption::VanillaOption() {}
+//VanillaOption::VanillaOption() {}
 
 VanillaOption::VanillaOption(double _K, double _r, double _T, 
-                             double _sigma, PayOff* _pay_off) : 
-  K(_K), r(_r), T(_T), sigma(_sigma), pay_off(_pay_off) {
-  
-  std::cout << "K init in vanilla" << this->K << std::endl;
-
-}
-
+                             double _sigma) : 
+  K(_K), r(_r), T(_T), sigma(_sigma) {}
 
 
 EuropeanCallOption::EuropeanCallOption(double _K, double _r, double _T, 
                              double _sigma) 
-: VanillaOption(_K, _r, _T, _sigma, new PayOffCall(_K)) {
-
-  std::cout << "K init in european" << this->K << std::endl;
-}
+: EuropeanOption(_K, _r, _T, _sigma) {}
 
 
 double european_call_price_for_0_spot(double time_to_maturity) {
@@ -58,7 +49,7 @@ double EuropeanCallOption::option_price_at_maturity(double spot) const {
 }
 
 AmericanCallOption::AmericanCallOption(double _K, double _r, double _T, double _sigma)
-: VanillaOption(_K, _r, _T, _sigma, new PayOffCall(_K)) {}
+: AmericanOption(_K, _r, _T, _sigma) {}
 
 double AmericanCallOption::option_price_for_0_spot(double time_to_maturity) const {
   // american and european options have the same boundary condition for 0 spot

@@ -8,94 +8,61 @@
 // Finite Difference Method - Abstract Base Class
 class FDMBase {
  protected:
-  ConvectionDiffusionPDE* pde;
 
   // Space discretisation
   double x_dom;      // Spatial extent [0.0, x_dom]
-  unsigned long M;   // Number of spatial differencing points
+  size_t M;   // Number of spatial differencing points
   double dx;         // Spatial step size (calculated from above)
-  std::vector<double> x_values;  // Stores the coordinates of the x dimension
 
   // Time discretisation
   double t_dom;      // Temporal extent [0.0, t_dom]
-  unsigned long N;   // Number of temporal differencing points
-  double dt;         // Temporal step size (calculated from above)
-
-  // Time-marching
-  double prev_t, cur_t;   // Current and previous times
-
-  // Differencing coefficients
-  double alpha, beta, gamma;
-
-  // Storage
-  std::vector<double> new_result;   // New solution (becomes N+1)
-  std::vector<double> old_result;   // Old solution (becomes N)
+  size_t N;   // Number of temporal differencing points
 
   // Constructor
-  FDMBase(double _x_dom, unsigned long _M,
-          double _t_dom, unsigned long _N,
-          ConvectionDiffusionPDE* _pde);
-
-  // Override these virtual methods in derived classes for 
-  // specific FDM techniques, such as explicit Euler, Crank-Nicolson, etc.
-  virtual void calculate_step_sizes() = 0;
-  virtual void set_initial_conditions() = 0;
-  virtual void calculate_boundary_conditions() = 0;
-  virtual void calculate_inner_domain() = 0;
+  FDMBase(double _x_dom, size_t _M,
+          double _t_dom, size_t _N);
 
  public:
   // Carry out the actual time-stepping
   virtual void step_march(std::string output_file) = 0;
+  virtual ConvectionDiffusionPDE const * get_pde() = 0;
 };
 
-class FDMEulerExplicit : public FDMBase {
- protected:
-  void calculate_step_sizes();
-  void set_initial_conditions();
-  void calculate_boundary_conditions();
-  void calculate_inner_domain();
-
- public:
-  FDMEulerExplicit(double _x_dom, unsigned long _M,
-                   double _t_dom, unsigned long _N,
-                   ConvectionDiffusionPDE* _pde);
-
-  void step_march(std::string output_file);
-};
 
 // TODO : rather than take a pde as argument, take a european option and create a BS for it
 // TODO : remove most of methods
 
-class FDMEulerImplicit : public FDMBase {
+class BSEuroImplicit : public FDMBase {
  protected:
-  void calculate_step_sizes();
-  void set_initial_conditions();
-  void calculate_boundary_conditions();
-  void calculate_inner_domain();
+  BlackScholesPDE const * pde; // TODO : does this work with base constructor ?
 
  public:
-  FDMEulerImplicit(double _x_dom, unsigned long _M,
-                   double _t_dom, unsigned long _N,
-                   ConvectionDiffusionPDE* _pde);
+  BSEuroImplicit(double _x_dom, size_t _M,
+                   double _t_dom, size_t _N,
+                   EuropeanOption * european_option);
+
+  ConvectionDiffusionPDE const * get_pde() { return pde; }
 
   void step_march(std::string output_file);
+  ~BSEuroImplicit() { delete pde; }
 };
 
+/*
 struct AmericanOptionParameters {
-  BlackScholesPDE * no_early_exercise_pde;
-};
+  BlackScholesPDE const * no_early_exercise_pde;
 
-class PriceAmericanOption : public FDMBase {
-  void calculate_step_sizes();
-  void set_initial_conditions();
-  void calculate_boundary_conditions();
-  void calculate_inner_domain();
+};
+*/
+
+class BSAmericanImplicitUniform : public FDMBase {
+  BlackScholesPDE const * no_early_exercise_pde;
 
  public:
-  PriceAmericanOption(double _x_dom, unsigned long _M,
-                   double _t_dom, unsigned long _N,
-                   AmericanOptionParameters params);
-
+  BSAmericanImplicitUniform(double _x_dom, size_t _M,
+                   double _t_dom, size_t _N,
+                   AmericanOption * american_option);
+  
+  ConvectionDiffusionPDE const * get_pde() { return no_early_exercise_pde; }
   void step_march(std::string output_file);
 };
 #endif

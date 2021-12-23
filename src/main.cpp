@@ -1,4 +1,3 @@
-#include "../include/payoff.h"
 #include "../include/option.h"
 #include "../include/pde.h"
 #include "../include/fdm.h"
@@ -21,29 +20,31 @@ int main(int argc, char **argv) {
 
   // Create the PayOff and Option objects
   //PayOff* pay_off_call = new PayOffCall(K);
-  std::cout << "in main K is " << K << std::endl;
   EuropeanCallOption* call_option = new EuropeanCallOption(K, r, T, v);
 
   // Create the PDE and FDM objects
-  BlackScholesPDE* bs_pde = new BlackScholesPDE(call_option);
-  FDMEulerImplicit fdm_euler(x_dom, M, t_dom, N, bs_pde);
+  //BlackScholesPDE* bs_pde = new BlackScholesPDE(call_option);
+  std::cout << "before fdm";
+  BSEuroImplicit fdm_euler(x_dom, M, t_dom, N, call_option);
 
   //AmericanOptionParameters call_params;
   //call_params.no_early_exercise_pde = bs_pde;
 
-  //PriceAmericanOption price(x_dom, M, t_dom, N, call_params);
+  //BSAmericanImplicitUniform price(x_dom, M, t_dom, N, call_params);
+  std::cout << "before step";
 
   // Run the FDM solver
-  fdm_euler.step_march("call_fdm_implicit_backwards.csv");
+  fdm_euler.step_march("call_fdm_implicit_refactor.csv");
   //price.step_march("america.csv");
 
   // Compute Put Price
-  //getPutPricesFromCallFile("call_fdm_implicit.csv", T, r, K, "put_fdm_implicit");
+  //put call parity works pretty bad
+  //getPutPricesFromCallFile("call_fdm_implicit_backwards.csv", T, r, K, "put_fdm_implicit");
 
   // Delete the PDE, PayOff and Option objects
-  delete bs_pde;
+  //delete bs_pde; //TODO : move to proper destructors
   delete call_option;
-  //delete pay_off_call;
+  //delete pay_off_call; // TODO : move to proper destructors
 
   return 0;
 }

@@ -1,14 +1,8 @@
 #ifndef __VANILLA_OPTION_H
 #define __VANILLA_OPTION_H
 
-#include "../include/payoff.h"
-
 class VanillaOption {
  public:
-
-  /* TODO : completely remove payoff objects
-  */
-  PayOff* pay_off;
 
   double K;
   double r;
@@ -22,33 +16,69 @@ class VanillaOption {
   virtual double option_price_for_big_spot(double time, double spot) const = 0;
   virtual double option_price_at_maturity(double spot) const = 0;
 
-  VanillaOption();
+  // TODO : why default constructor ?
+  //VanillaOption();
   VanillaOption(double _K, double _r, double _T, 
-                double _sigma, PayOff* _pay_off);
+                double _sigma);
   
 };
 
-class EuropeanCallOption : public VanillaOption {
+
+class EuropeanOption : public VanillaOption {
+    protected:
+    EuropeanOption(double _K, double _r, double _T, 
+                double _sigma)
+    : VanillaOption(_K, _r, _T, _sigma) {}
+};
+
+class AmericanOption : public VanillaOption {
+    protected:
+    AmericanOption(double _K, double _r, double _T, 
+                double _sigma)
+    : VanillaOption(_K, _r, _T, _sigma) {}
+};
+
+class EuropeanCallOption : public EuropeanOption {
  public:
 
   double option_price_for_0_spot(double time) const;
   double option_price_for_big_spot(double time, double spot) const;
   double option_price_at_maturity(double spot) const;
 
-  EuropeanCallOption();
+  //EuropeanCallOption();
   EuropeanCallOption(double _K, double _r, double _T, 
                 double _sigma);
   
 };
 
-class AmericanCallOption : public VanillaOption {
+class EuropeanPutOption : public EuropeanOption {
  public:
 
   double option_price_for_0_spot(double time) const;
   double option_price_for_big_spot(double time, double spot) const;
   double option_price_at_maturity(double spot) const;
 
-  AmericanCallOption();
+  //EuropeanPutOption();
+  EuropeanPutOption(double _K, double _r, double _T, 
+                double _sigma);
+  
+};
+
+/*
+union EuroOption {
+    EuropeanCallOption call;
+    EuropeanPutOption put;
+};
+*/
+
+class AmericanCallOption : public AmericanOption {
+ public:
+
+  double option_price_for_0_spot(double time) const;
+  double option_price_for_big_spot(double time, double spot) const;
+  double option_price_at_maturity(double spot) const;
+
+  //AmericanCallOption();
   AmericanCallOption(double _K, double _r, double _T, 
                 double _sigma);
   
