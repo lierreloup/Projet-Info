@@ -22,7 +22,10 @@ class ConvectionDiffusionPDE {
 class BlackScholesPDE : public ConvectionDiffusionPDE {
  public:
   VanillaOption* option;
-  BlackScholesPDE(VanillaOption* _option);
+
+  // since VanillaOption is an abstract type, we can't pass it as an argument ; we must pass a pointer or a reference
+  // TODO : make it const &
+  BlackScholesPDE(VanillaOption * _option);
   
   double diff_coeff(double t, double x) const;
   double conv_coeff(double t, double x) const;

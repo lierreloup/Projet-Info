@@ -6,6 +6,20 @@
 #include <iostream>
 
 int main(int argc, char **argv) {
+
+  //argv[0] is the name of a file which contains arguments
+  double s, t, K, r, v;
+
+  set_params_from_file(argv[0], s, t, K, r, v);
+
+  double price = price_european_call(s, t, K, r, v);
+
+  Output output;
+  output.price = price;
+  output.delta = 0xbadc0de;
+  create_output_file("out", output);
+
+  /*
   // Create the option parameters
   double K = 0.5;  // Strike price
   double r = 0.05;   // Risk-free rate (5%)
@@ -14,27 +28,28 @@ int main(int argc, char **argv) {
 
   // FDM discretisation parameters
   double x_dom = 1;       // Spot goes from [0.0, 1.0]
-  unsigned long M = 20;
+  size_t M = 20;
   double t_dom = T;         // Time period as for the option
-  unsigned long N = 20;     
-
+  size_t N = 20;     
+*/
   // Create the PayOff and Option objects
   //PayOff* pay_off_call = new PayOffCall(K);
-  EuropeanCallOption* call_option = new EuropeanCallOption(K, r, T, v);
+  //EuropeanCallOption* call_option = new EuropeanCallOption(K, r, T, v);
 
   // Create the PDE and FDM objects
   //BlackScholesPDE* bs_pde = new BlackScholesPDE(call_option);
-  std::cout << "before fdm";
-  BSEuroImplicit fdm_euler(x_dom, M, t_dom, N, call_option);
+  //BSEuroImplicit fdm_euler(x_dom, M, t_dom, N, call_option);
 
   //AmericanOptionParameters call_params;
   //call_params.no_early_exercise_pde = bs_pde;
+/*
+  AmericanCallOption american_call = AmericanCallOption(K, r, v);
+  BSAmericanImplicitUniform american_pricer(x_dom, M, t_dom, N, &american_call);
 
-  //BSAmericanImplicitUniform price(x_dom, M, t_dom, N, call_params);
-  std::cout << "before step";
-
+  american_pricer.step_march("american_call_refactor.csv");
+*/
   // Run the FDM solver
-  fdm_euler.step_march("call_fdm_implicit_refactor.csv");
+  //fdm_euler.step_march("call_fdm_implicit_refactor.csv");
   //price.step_march("america.csv");
 
   // Compute Put Price
@@ -43,7 +58,8 @@ int main(int argc, char **argv) {
 
   // Delete the PDE, PayOff and Option objects
   //delete bs_pde; //TODO : move to proper destructors
-  delete call_option;
+  //delete call_option;
+
   //delete pay_off_call; // TODO : move to proper destructors
 
   return 0;

@@ -15,7 +15,6 @@ BSEuroImplicit::BSEuroImplicit(double _x_dom, size_t _M,
                                    double _t_dom, size_t _N,
                                    EuropeanOption * euro_option) 
   : FDMBase(_x_dom, _M, _t_dom, _N), pde(new BlackScholesPDE(euro_option)) {
-    std::cout << "pde " << this->pde->source_coeff(0,0);
   }
 
 // Diagonal coefficients of the tridiagonal matrix A in implicit resolution
@@ -211,7 +210,7 @@ void BS_initial_conditions(size_t M, std::vector<double> & old_result, std::vect
 
 typedef std::vector<double> & (* increment_function)(std::vector<double> const & x_values, double dt, double prev_t, ConvectionDiffusionPDE const * pde, std::vector<double> & old_result, std::vector<double> & new_result);
 
-void step_march_aux(std::string output_file, BlackScholesPDE const * pde, size_t M, size_t N, std::vector<double> const & x_values, std::vector<double> const & time_to_maturity_values, increment_function increment_price) {
+std::vector<double> step_march_aux(std::string output_file, BlackScholesPDE const * pde, size_t M, size_t N, std::vector<double> const & x_values, std::vector<double> const & time_to_maturity_values, increment_function increment_price) {
   double prev_t = 0;
   double cur_t = 0;
   std::vector<double> old_result(M+1, 0), new_result(M+1, 0);
@@ -266,6 +265,8 @@ void step_march_aux(std::string output_file, BlackScholesPDE const * pde, size_t
     prev_t = cur_t;
   }
 
+  return new_result;
+
   fdm_out.close();
   }
 
@@ -279,17 +280,18 @@ void step_march_aux(std::string output_file, BlackScholesPDE const * pde, size_t
 /*
   * Solve the PDE for all time steps and space steps
 */
-void step_march_uniform(std::string output_file, double x_dom, size_t M,
-                   double t_dom, size_t N, BlackScholesPDE const * pde, increment_function increment_price) {
+std::vector<double> step_march_uniform(std::string output_file, double x_dom, size_t M,
+                   double t_dom, size_t N, BlackScholesPDE const * pde, increment_function increment_price, NecessaryResults & results) {
   
   std::cout << "before aux";
   double dx = x_dom/static_cast<double>(M);
   double dt = t_dom/static_cast<double>(N);
 
-  std::vector<double>  x_values = get_uniform_x_grid(M, dx);
+  std::vector<double> x_values = get_uniform_x_grid(M, dx);
+  results.x_values = std::vector<double>(x_values);
   std::vector<double> time_to_maturity_values = get_uniform_x_grid(N, dt);
 
-  step_march_aux(
+  return step_march_aux(
     output_file
     , pde
     , M
@@ -298,16 +300,15 @@ void step_march_uniform(std::string output_file, double x_dom, size_t M,
     , time_to_maturity_values
     , increment_price
   );
-
 }
 
 
 /*
   * Solve the PDE for all time steps and space steps
 */
-void BSEuroImplicit::step_march(std::string output_file) {
+std::vector<double> BSEuroImplicit::step_march(std::string output_file) {
 
-  step_march_uniform(
+  return step_march_uniform(
     output_file
     , this->x_dom
     , this->M
@@ -315,6 +316,7 @@ void BSEuroImplicit::step_march(std::string output_file) {
     , this->N
     , this->pde
     , increment_european_price
+    , this->results
   );
 }
 
@@ -333,7 +335,7 @@ std::vector<double> & increment_american_price(std::vector<double> const & x_val
   size_t M = new_result.size() - 1;
 
   // We use the Horng-Tien method to compute American Option prices
-  // That is, if the time derivative is strictly smaller than 0, set it to 0
+  // That is, if the backward time derivative is strictly smaller than 0, set it to 0
   for (int n = 0; n <= M; n++) {
     try
     {
@@ -357,8 +359,8 @@ std::vector<double> & increment_american_price(std::vector<double> const & x_val
   BSAmericanImplicitUniform::BSAmericanImplicitUniform(double _x_dom, size_t _M, double _t_dom, size_t _N, AmericanOption * american_option) 
   : FDMBase(_x_dom, _M, _t_dom, _N), no_early_exercise_pde(new BlackScholesPDE(american_option)) {}
 
-  void BSAmericanImplicitUniform::step_march(std::string output_file) {
-    step_march_uniform(
+  std::vector<double> BSAmericanImplicitUniform::step_march(std::string output_file) {
+    return step_march_uniform(
       output_file
       , this->x_dom
       , this->M
@@ -366,6 +368,7 @@ std::vector<double> & increment_american_price(std::vector<double> const & x_val
       , this->N
       , this->no_early_exercise_pde
       , increment_american_price
+      , this->results
     );
   }
 

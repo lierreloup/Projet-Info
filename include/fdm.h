@@ -5,6 +5,10 @@
 #include <vector>
 #include <string> 
 
+struct NecessaryResults {
+  std::vector<double> x_values;
+};
+
 // Finite Difference Method - Abstract Base Class
 class FDMBase {
  protected:
@@ -23,8 +27,12 @@ class FDMBase {
           double _t_dom, size_t _N);
 
  public:
+  NecessaryResults results;
+
   // Carry out the actual time-stepping
-  virtual void step_march(std::string output_file) = 0;
+  virtual std::vector<double> step_march(std::string output_file) = 0;
+
+  // TODO : maybe make this a shared pointer for safety, or delete completely
   virtual ConvectionDiffusionPDE const * get_pde() = 0;
 };
 
@@ -34,8 +42,9 @@ class FDMBase {
 
 class BSEuroImplicit : public FDMBase {
  protected:
-  BlackScholesPDE const * pde; // TODO : does this work with base constructor ?
+  BlackScholesPDE const * pde;
 
+// TODO : replace pointer to European option with reference
  public:
   BSEuroImplicit(double _x_dom, size_t _M,
                    double _t_dom, size_t _N,
@@ -43,7 +52,8 @@ class BSEuroImplicit : public FDMBase {
 
   ConvectionDiffusionPDE const * get_pde() { return pde; }
 
-  void step_march(std::string output_file);
+  // return price
+  std::vector<double> step_march(std::string output_file) override;
   ~BSEuroImplicit() { delete pde; }
 };
 
@@ -63,6 +73,10 @@ class BSAmericanImplicitUniform : public FDMBase {
                    AmericanOption * american_option);
   
   ConvectionDiffusionPDE const * get_pde() { return no_early_exercise_pde; }
-  void step_march(std::string output_file);
+
+  std::vector<double> step_march(std::string output_file) override;
+
+  ~BSAmericanImplicitUniform() { delete no_early_exercise_pde; }
+
 };
 #endif

@@ -6,7 +6,6 @@ class VanillaOption {
 
   double K;
   double r;
-  double T;
   double sigma;
 
   //double (*option_value_for_0_spot)(double time);
@@ -18,7 +17,7 @@ class VanillaOption {
 
   // TODO : why default constructor ?
   //VanillaOption();
-  VanillaOption(double _K, double _r, double _T, 
+  VanillaOption(double _K, double _r, 
                 double _sigma);
   
 };
@@ -26,16 +25,16 @@ class VanillaOption {
 
 class EuropeanOption : public VanillaOption {
     protected:
-    EuropeanOption(double _K, double _r, double _T, 
+    EuropeanOption(double _K, double _r, 
                 double _sigma)
-    : VanillaOption(_K, _r, _T, _sigma) {}
+    : VanillaOption(_K, _r, _sigma) {}
 };
 
 class AmericanOption : public VanillaOption {
     protected:
-    AmericanOption(double _K, double _r, double _T, 
+    AmericanOption(double _K, double _r, 
                 double _sigma)
-    : VanillaOption(_K, _r, _T, _sigma) {}
+    : VanillaOption(_K, _r, _sigma) {}
 };
 
 class EuropeanCallOption : public EuropeanOption {
@@ -46,7 +45,7 @@ class EuropeanCallOption : public EuropeanOption {
   double option_price_at_maturity(double spot) const;
 
   //EuropeanCallOption();
-  EuropeanCallOption(double _K, double _r, double _T, 
+  EuropeanCallOption(double _K, double _r,
                 double _sigma);
   
 };
@@ -59,7 +58,7 @@ class EuropeanPutOption : public EuropeanOption {
   double option_price_at_maturity(double spot) const;
 
   //EuropeanPutOption();
-  EuropeanPutOption(double _K, double _r, double _T, 
+  EuropeanPutOption(double _K, double _r,
                 double _sigma);
   
 };
@@ -79,7 +78,7 @@ class AmericanCallOption : public AmericanOption {
   double option_price_at_maturity(double spot) const;
 
   //AmericanCallOption();
-  AmericanCallOption(double _K, double _r, double _T, 
+  AmericanCallOption(double _K, double _r,
                 double _sigma);
   
 };

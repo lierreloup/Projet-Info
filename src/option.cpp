@@ -7,14 +7,14 @@
 
 //VanillaOption::VanillaOption() {}
 
-VanillaOption::VanillaOption(double _K, double _r, double _T, 
+VanillaOption::VanillaOption(double _K, double _r,
                              double _sigma) : 
-  K(_K), r(_r), T(_T), sigma(_sigma) {}
+  K(_K), r(_r), sigma(_sigma) {}
 
 
-EuropeanCallOption::EuropeanCallOption(double _K, double _r, double _T, 
+EuropeanCallOption::EuropeanCallOption(double _K, double _r,
                              double _sigma) 
-: EuropeanOption(_K, _r, _T, _sigma) {}
+: EuropeanOption(_K, _r, _sigma) {}
 
 
 double european_call_price_for_0_spot(double time_to_maturity) {
@@ -48,8 +48,8 @@ double EuropeanCallOption::option_price_at_maturity(double spot) const {
   return european_call_payoff(spot, this->K);
 }
 
-AmericanCallOption::AmericanCallOption(double _K, double _r, double _T, double _sigma)
-: AmericanOption(_K, _r, _T, _sigma) {}
+AmericanCallOption::AmericanCallOption(double _K, double _r, double _sigma)
+: AmericanOption(_K, _r, _sigma) {}
 
 double AmericanCallOption::option_price_for_0_spot(double time_to_maturity) const {
   // american and european options have the same boundary condition for 0 spot
