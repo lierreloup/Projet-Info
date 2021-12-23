@@ -290,6 +290,7 @@ std::vector<double> step_march_uniform(std::string output_file, double x_dom, si
   std::vector<double> x_values = get_uniform_x_grid(M, dx);
   results.x_values = std::vector<double>(x_values);
   std::vector<double> time_to_maturity_values = get_uniform_x_grid(N, dt);
+  results.t_values = std::vector<double>(time_to_maturity_values);
 
   return step_march_aux(
     output_file

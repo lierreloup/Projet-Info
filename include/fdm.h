@@ -12,6 +12,7 @@
  */
 struct NecessaryResults {
   std::vector<double> x_values;
+  std::vector<double> t_values;
 };
 
 
