@@ -5,8 +5,6 @@
 #include <math.h>
 #include <iostream>
 
-//VanillaOption::VanillaOption() {}
-
 VanillaOption::VanillaOption(double _K, double _r,
                              double _sigma) : 
   K(_K), r(_r), sigma(_sigma) {}

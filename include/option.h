@@ -1,6 +1,10 @@
 #ifndef __VANILLA_OPTION_H
 #define __VANILLA_OPTION_H
 
+/**
+ * @brief  abstract class for vanilla options, with parameters required for PDE pricing
+ * 
+ */
 class VanillaOption {
  public:
 
@@ -11,18 +15,38 @@ class VanillaOption {
   //double (*option_value_for_0_spot)(double time);
   //double (*option_value_for_infinite_spot) (double time);
   
+  /**
+   * @brief returns P(time, 0) where P(t, S) is the price of the option, S the spot, t the time to maturity
+   * 
+   * @param time 
+   * @return double 
+   */
   virtual double option_price_for_0_spot(double time) const = 0;
+
+  /**
+   * @brief returns approximate P(time, spot) where P(t, S) is the price of the option, S the spot (close to "infinity"), t the time to maturity
+   * 
+   * @param time time to maturity
+   * @param spot close to "infinity" (e.g 4 * strike)
+   * @return double 
+   */
   virtual double option_price_for_big_spot(double time, double spot) const = 0;
+
+  /**
+   * @brief returns P(0, spot) where P(t, S) is the price of the option, S the spot, t the time to maturity
+
+   * 
+   * @param spot 
+   * @return double (e.g the payoff)
+   */
   virtual double option_price_at_maturity(double spot) const = 0;
 
-  // TODO : why default constructor ?
-  //VanillaOption();
   VanillaOption(double _K, double _r, 
                 double _sigma);
   
 };
 
-
+// Abstract classes for european and american options
 class EuropeanOption : public VanillaOption {
     protected:
     EuropeanOption(double _K, double _r, 
@@ -37,6 +61,7 @@ class AmericanOption : public VanillaOption {
     : VanillaOption(_K, _r, _sigma) {}
 };
 
+//Concrete classes
 class EuropeanCallOption : public EuropeanOption {
  public:
 
@@ -62,13 +87,6 @@ class EuropeanPutOption : public EuropeanOption {
                 double _sigma);
   
 };
-
-/*
-union EuroOption {
-    EuropeanCallOption call;
-    EuropeanPutOption put;
-};
-*/
 
 class AmericanCallOption : public AmericanOption {
  public:

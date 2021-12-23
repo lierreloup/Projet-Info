@@ -5,9 +5,15 @@
 #include <vector>
 #include <string> 
 
+/**
+ * @brief this is a utility struct in case we have to store some info about the PDE solving
+ * (e.g spot values)
+ * 
+ */
 struct NecessaryResults {
   std::vector<double> x_values;
 };
+
 
 // Finite Difference Method - Abstract Base Class
 class FDMBase {
@@ -16,7 +22,6 @@ class FDMBase {
   // Space discretisation
   double x_dom;      // Spatial extent [0.0, x_dom]
   size_t M;   // Number of spatial differencing points
-  double dx;         // Spatial step size (calculated from above)
 
   // Time discretisation
   double t_dom;      // Temporal extent [0.0, t_dom]
@@ -27,9 +32,19 @@ class FDMBase {
           double _t_dom, size_t _N);
 
  public:
+  /**
+    * @brief necessary for pricing : store some info about the solving
+    * 
+    */
   NecessaryResults results;
 
-  // Carry out the actual time-stepping
+  /**
+   * @brief solve the pde
+   * 
+   * @param output_file 
+   * @return std::vector<double> the function values for final time and all space values
+   * @
+   */
   virtual std::vector<double> step_march(std::string output_file) = 0;
 
   // TODO : maybe make this a shared pointer for safety, or delete completely

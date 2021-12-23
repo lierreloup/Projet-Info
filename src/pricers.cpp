@@ -91,6 +91,7 @@ double price_aux(double spot, FDMBase & solve_pde, std::string output_pde) {
     return interpolate(spot, spot_values[left_index], left_price, spot_values[right_index], right_price);
 }
 
+
 double price_european_call(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde) {
     // create option
     EuropeanCallOption option(strike, rate, volatility);
