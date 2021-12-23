@@ -53,7 +53,6 @@ std::vector<double> & Thomas_solver(const std::vector<double>& lower, const std:
   dprime.at(0) = right_side.at(0) / diagonal.at(0);
 
   for (size_t i = 1; i < diagonal_size - 1; i++) {
-    std::cout << i << " diagonal " << diagonal_size << std::endl;
     // to avoid getting a headache, coefficients are named like in the wikipedia page https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
     // even though Wikipedia indices range from 1 to n, ours range from 0 to diagonal_size - 1
     double ci = upper.at(i);
@@ -83,10 +82,8 @@ std::vector<double> & Thomas_solver(const std::vector<double>& lower, const std:
     bi - ai * cprime.at(diagonal_size - 2)
   );
 
-  std::cout << "after loop";
   // now solve the linear equation by finding x such that A x = b
   result.at(end_result) = dprime.at(diagonal_size-1);
-  std::cout << "after end result";
 
   size_t i = diagonal_size - 2;
   for (size_t result_index = end_result - 1; result_index >= begin_result; result_index--)  
@@ -199,11 +196,9 @@ void BS_initial_conditions(size_t M, std::vector<double> & old_result, std::vect
   //old_result.resize(M+1, 0.0);
   //new_result.resize(M+1, 0.0);
   for (size_t m=0; m <= M; m++) {
-    std::cout << m;
     double cur_spot = x_values.at(m);
     old_result.at(m) = pde->init_cond(cur_spot);
   }
-  std::cout << "after spot";
   prev_t = 0;
   cur_t = 0;
 }
@@ -215,7 +210,6 @@ std::vector<double> step_march_aux(std::string output_file, BlackScholesPDE cons
   double cur_t = 0;
   std::vector<double> old_result(M+1, 0), new_result(M+1, 0);
   
-  std::cout << "before init";
   BS_initial_conditions(
     M
     , old_result
@@ -283,7 +277,6 @@ std::vector<double> step_march_aux(std::string output_file, BlackScholesPDE cons
 std::vector<double> step_march_uniform(std::string output_file, double x_dom, size_t M,
                    double t_dom, size_t N, BlackScholesPDE const * pde, increment_function increment_price, NecessaryResults & results) {
   
-  std::cout << "before aux";
   double dx = x_dom/static_cast<double>(M);
   double dt = t_dom/static_cast<double>(N);
 

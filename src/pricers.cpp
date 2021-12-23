@@ -49,10 +49,8 @@ void getPutPricesFromCallFile(std::string call_prices_file, double maturity, dou
  */
 void closest(std::vector<double> x_values, double target, size_t & left_index, size_t & right_index) {
     size_t I = x_values.size();
-        std::cout << "my size is " << I << std::endl;
 
     for (size_t i = 0; i < I-1; i++) {
-        std::cout << "watcha doin" << x_values[i] << std::endl;
         if (x_values[i] <= target && target <= x_values[i+1]) {
             left_index = i, right_index = i+1;
             return;

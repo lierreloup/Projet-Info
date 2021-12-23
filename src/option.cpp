@@ -37,7 +37,6 @@ double EuropeanCallOption::option_price_for_big_spot(double time_to_maturity, do
 }
 
 double european_call_payoff(double spot, double strike) {
-  //std::cout << "spot " << spot << " strike " << strike << std::endl;
   double diff = spot - strike;
   return diff > 0 ? diff : 0;
 }

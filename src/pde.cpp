@@ -36,7 +36,6 @@ double BlackScholesPDE::boundary_left(double t, double x) const {
 
 // Right boundary-condition 
 double BlackScholesPDE::boundary_right(double t, double x) const {
-  std::cout << "time to mat " << t << " spot " << x << " boundary right " << this->option->option_price_for_big_spot(t, x) << std::endl;
   return this->option->option_price_for_big_spot(t, x);
   // This is via Put-Call Parity and works for a call option
   //return (x-(option->K)*exp(-(option->r)*((option->T)-t))); 
@@ -45,7 +44,6 @@ double BlackScholesPDE::boundary_right(double t, double x) const {
 // Initial condition 
 double BlackScholesPDE::init_cond(double x) const {
   double res = this->option->option_price_at_maturity(x);
-  //std::cout << "spot " << x << " payoff " << res << std::endl;
   return res;
   //return option->pay_off->operator()(x);
 }
