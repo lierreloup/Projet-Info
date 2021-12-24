@@ -1,8 +1,8 @@
-// TODO : rename this module as "utils" in .h, .cpp, Makefile
+#ifndef __PRICERS_H
+#define __PRICERS_H
 
 #include <string>
 
-void getPutPricesFromCallFile(std::string call_prices_file, double maturity, double rate, double strike, std::string output_file);
 
 /**
  * @brief get price for european call
@@ -18,6 +18,19 @@ void getPutPricesFromCallFile(std::string call_prices_file, double maturity, dou
 double price_european_call(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde = "european_call.csv");
 
 /**
+ * @brief get price for european put
+ * 
+ * @param spot 
+ * @param time_to_maturity 
+ * @param strike 
+ * @param rate 
+ * @param volatility 
+ * @param output_pde 
+ * @return double 
+ */
+double price_european_put(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde = "european_put.csv");
+
+/**
  * @brief get price for american call
  * 
  * @param spot 
@@ -31,31 +44,26 @@ double price_european_call(double spot, double time_to_maturity, double strike, 
 double price_american_call(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde = "american_call.csv");
 
 /**
- * @brief Reads the vba input (vba must write its input in a file) and assigns it to the proper parameters
+ * @brief get price for american put
  * 
- * @param filename input file
  * @param spot 
  * @param time_to_maturity 
  * @param strike 
  * @param rate 
  * @param volatility 
+ * @param output_pde 
+ * @return double 
  */
-void set_params_from_file(std::string filename, double & spot, double & time_to_maturity, double & strike, double & rate, double & volatility);
+double price_american_put(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde = "american_put.csv");
 
-/**
- * @brief structure which contains all outputs needed by the VBA app
- * 
- */
-struct Output {
-    double price;
-    double delta;
-    //etc
-};
 
-/**
- * @brief Create an output file so that VBA app gets it back
- * 
- * @param filename 
- * @param output 
- */
-void create_output_file(std::string filename, Output output);
+
+// "BONUS" functions
+
+// Generates put prices from call prices by put call parity ;
+// gives pretty good results, though values for big spots may get negative
+// (but very close to 0)
+// Allowed to make a quick "check" of our pde put prices
+void getPutPricesFromCallFile(std::string call_prices_file, double rate, double strike, std::string output_file);
+
+#endif

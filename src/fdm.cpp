@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <functional>
+#include <math.h>
 #include "../include/fdm.h"
 
 FDMBase::FDMBase(double _x_dom, size_t _M,
@@ -193,8 +194,6 @@ std::vector<double> get_uniform_x_grid(size_t M, double dx) {
 
 void BS_initial_conditions(size_t M, std::vector<double> & old_result, std::vector<double> & new_result, std::vector<double> const & x_values, ConvectionDiffusionPDE const * pde, double & prev_t, double & cur_t) {
 
-  //old_result.resize(M+1, 0.0);
-  //new_result.resize(M+1, 0.0);
   for (size_t m=0; m <= M; m++) {
     double cur_spot = x_values.at(m);
     old_result.at(m) = pde->init_cond(cur_spot);
@@ -251,7 +250,7 @@ std::vector<double> step_march_aux(std::string output_file, BlackScholesPDE cons
 
     for (int m=0; m <= M; m++) {
       //store x, t and price in a new line of the file
-      // TODO : why prev_t ?
+      // TODO : we can remove prev_t fromm most functions
       fdm_out << x_values.at(m) << " " << cur_t << " " << new_result.at(m) << std::endl;
     }
     
@@ -330,12 +329,14 @@ std::vector<double> & increment_american_price(std::vector<double> const & x_val
 
   // We use the Horng-Tien method to compute American Option prices
   // That is, if the backward time derivative is strictly smaller than 0, set it to 0
-  for (int n = 0; n <= M; n++) {
+  for (int m = 0; m <= M; m++) {
     try
     {
-      double time_derivative_times_dt = new_result.at(n) - old_result.at(n);
+      double time_derivative_times_dt = new_result.at(m) - old_result.at(m);
       if (time_derivative_times_dt < 0) {
-        new_result[n] = 0;
+        new_result[m] = old_result[m]; 
+        //experience seems to show that this never happens when american and european exercise are
+        //equivalent
       }
     }
     catch(const std::exception& e)
@@ -350,21 +351,83 @@ std::vector<double> & increment_american_price(std::vector<double> const & x_val
 
 
 
-  BSAmericanImplicitUniform::BSAmericanImplicitUniform(double _x_dom, size_t _M, double _t_dom, size_t _N, AmericanOption * american_option) 
-  : FDMBase(_x_dom, _M, _t_dom, _N), no_early_exercise_pde(new BlackScholesPDE(american_option)) {}
+BSAmericanImplicitUniform::BSAmericanImplicitUniform(double _x_dom, size_t _M, double _t_dom, size_t _N, AmericanOption * american_option) 
+: FDMBase(_x_dom, _M, _t_dom, _N), no_early_exercise_pde(new BlackScholesPDE(american_option)) {}
 
-  std::vector<double> BSAmericanImplicitUniform::step_march(std::string output_file) {
-    return step_march_uniform(
-      output_file
-      , this->x_dom
-      , this->M
-      , this->t_dom
-      , this->N
-      , this->no_early_exercise_pde
-      , increment_american_price
-      , this->results
-    );
+std::vector<double> BSAmericanImplicitUniform::step_march(std::string output_file) {
+  return step_march_uniform(
+    output_file
+    , this->x_dom
+    , this->M
+    , this->t_dom
+    , this->N
+    , this->no_early_exercise_pde
+    , increment_american_price
+    , this->results
+  );
+}
+
+// NON UNIFORM DISCRETIZATION
+
+double compute_delta_eta(double M, double x_dom, double K, double c) {
+  return (
+    asinh((x_dom - K) / c) - asinh(-K / c)
+  ) / (
+    M
+  );
+}
+
+double compute_eta(double i, double K, double c, double delta_eta) {
+  return asinh(-K / c) + i * delta_eta;
+}
+
+std::vector<double> get_non_uniform_grid(size_t M, double x_dom, double K, double c) {
+  std::vector<double> x_values(M+1);
+  double delta_eta = compute_delta_eta(static_cast<double>(M), x_dom, K, c);
+
+  for (size_t i = 0; i <= M; i++) {
+    double eta_i = compute_eta(static_cast<double> (i), K, c, delta_eta);
+    x_values.at(i) = K + c * sinh(eta_i);
   }
 
+  return x_values;
+}
 
+std::vector<double> step_march_non_uniform(std::string output_file, double x_dom, size_t M,
+                   double t_dom, size_t N, BlackScholesPDE const * pde, increment_function increment_price, NecessaryResults & results) {
+  
+  double dt = t_dom/static_cast<double>(N);
+
+  // values for K and c come from the Hout-Foulon article
+  std::vector<double> x_values = get_non_uniform_grid(M, x_dom, pde->option->K, pde->option->K/5);
+  results.x_values = std::vector<double>(x_values);
+  std::vector<double> time_to_maturity_values = get_uniform_x_grid(N, dt);
+  results.t_values = std::vector<double>(time_to_maturity_values);
+
+  return step_march_aux(
+    output_file
+    , pde
+    , M
+    , N
+    , x_values
+    , time_to_maturity_values
+    , increment_price
+  );
+}
+
+BSAmericanImplicit::BSAmericanImplicit(double _x_dom, size_t _M, double _t_dom, size_t _N, AmericanOption * american_option) 
+: FDMBase(_x_dom, _M, _t_dom, _N), no_early_exercise_pde(new BlackScholesPDE(american_option)) {}
+
+std::vector<double> BSAmericanImplicit::step_march(std::string output_file) {
+  return step_march_non_uniform(
+    output_file
+    , this->x_dom
+    , this->M
+    , this->t_dom
+    , this->N
+    , this->no_early_exercise_pde
+    , increment_american_price
+    , this->results
+  );
+}
 #endif

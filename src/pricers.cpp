@@ -7,34 +7,6 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>      // std::invalid_argument
-/**
- * @brief Get the Put Price From Call Price using Put Call parity
- * 
- * @param callPrice 
- * @param spot 
- * @param time 
- * @param rate 
- * @param strike 
- */
-double getPutPriceFromCallPrice(double call_price, double spot, double time, double maturity, double rate, double strike) {
-    return call_price - spot + exp(-rate * (maturity - time)) * strike;
-}
-
-void getPutPricesFromCallFile(std::string call_prices_file, double maturity, double rate, double strike, std::string output_file) {
-    std::fstream call_prices_stream(call_prices_file, std::ios::in);
-    std::ofstream put_out(output_file);
-
-    while(call_prices_stream) {
-        double spot, time, call_price;           
-
-        call_prices_stream >> spot >> time >> call_price;    
-
-        double put_price = getPutPriceFromCallPrice(call_price, spot, time, maturity, rate, strike);
-        put_out << spot << ' ' << time << ' ' << put_price << std::endl;
-    }
-
-    put_out.close();
-}
 
 /**
  * @brief finds indices in x_values such that x_values[left_index] <= target <= x_values[right_index] 
@@ -44,12 +16,13 @@ void getPutPricesFromCallFile(std::string call_prices_file, double maturity, dou
  * @param left_index 
  * @param right_index
  * 
- * @attention if target = last value of x_values, right_index = -1
+ * @attention if target = last value of x_values, right_index is set to -1
  * @throws std::invalid_argument
  */
 void closest(std::vector<double> x_values, double target, size_t & left_index, size_t & right_index) {
     size_t I = x_values.size();
 
+    // look for the proper indices
     for (size_t i = 0; i < I-1; i++) {
         if (x_values[i] <= target && target <= x_values[i+1]) {
             left_index = i, right_index = i+1;
@@ -57,9 +30,12 @@ void closest(std::vector<double> x_values, double target, size_t & left_index, s
         }
     }
 
+    // rare case : the last x value is actually the target value
     if (target == x_values[I-1]) {
         left_index = I-1, right_index = -1;
     }
+
+    // exception case : no interval was found
     else {
         throw std::invalid_argument("closest : no closest indices were found ; is x_values properly ordered ? is target too big ?");
     }
@@ -67,13 +43,34 @@ void closest(std::vector<double> x_values, double target, size_t & left_index, s
     return;
 }
 
+/**
+ * @brief performs linear interpolation
+ * 
+ * @param x_target 
+ * @param x0 
+ * @param y0 
+ * @param x1 
+ * @param y1 
+ * @return double the estimated y for x_target
+ */
 double interpolate(double x_target, double x0, double y0, double x1, double y1) {
-    return y0 + (x_target - x0) * (y1 - y0) / (x1 - x0);
+    double res = y0 + (x_target - x0) * (y1 - y0) / (x1 - x0);
+    std::cout << "x " << x_target << " x0 " << x0 << " x1 "<<x1<<" y0 "<<y0<<" y1 "<<y1<<'\n';
+    std::cout << res << '\n';
+    return res;
 }
 
+/**
+ * @brief Auxilliary function for pricers ; solves the PDE and interpolates the price
+ * 
+ * @param spot 
+ * @param solve_pde 
+ * @param output_pde 
+ * @return double 
+ */
 double price_aux(double spot, FDMBase & solve_pde, std::string output_pde) {
     std::vector<double> prices_at_time_to_maturity = solve_pde.step_march(output_pde);
-    std::vector<double> spot_values = solve_pde.results.x_values;
+    std::vector<double> spot_values(solve_pde.results.x_values);
 
     // find prices for 2 closest spots
     size_t left_index, right_index;
@@ -98,7 +95,19 @@ double price_european_call(double spot, double time_to_maturity, double strike, 
     double t_dom = time_to_maturity, x_dom = 4 * strike; // 4 * strike is usually enough for the boundary conditions to hold approximately
     size_t M = 100, N = 100;
 
-    // solve pde and get the last line (which corresponds to prices for all spots and given time_to_maturity)
+    // instantiate pde solver
+    BSEuroImplicit solve_pde(x_dom, M, t_dom, N, &option);
+
+    //solve and interpolate
+    return price_aux(spot, solve_pde, output_pde);
+}
+
+double price_european_put(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde) {
+    EuropeanPutOption option(strike, rate, volatility);
+
+    double t_dom = time_to_maturity, x_dom = 4 * strike; // 4 * strike is usually enough for the boundary conditions to hold approximately
+    size_t M = 1000, N = 100;
+
     BSEuroImplicit solve_pde(x_dom, M, t_dom, N, &option);
 
     return price_aux(spot, solve_pde, output_pde);
@@ -113,36 +122,66 @@ double price_american_call(double spot, double time_to_maturity, double strike, 
     size_t M = 100, N = 100;
 
     // solve pde and get the last line (which corresponds to prices for all spots and given time_to_maturity)
-    BSAmericanImplicitUniform solve_pde(x_dom, M, t_dom, N, &option);
+    BSAmericanImplicit solve_pde(x_dom, M, t_dom, N, &option);
 
     return price_aux(spot, solve_pde, output_pde);
 }
 
-/**
- * @brief Set the params from file
- * 
- * @param filename path to file ; the file should contain each parameter separated by a new line (or a space)
- * @param spot 
- * @param time_to_maturity 
- * @param strike 
- * @param rate 
- * @param volatility 
- */
-void set_params_from_file(std::string filename, double & spot, double & time_to_maturity, double & strike, double & rate, double & volatility) {
-    std::fstream params_stream(filename, std::ios::in);
 
-    while(params_stream) {
-        params_stream >> spot >> time_to_maturity >> strike >> rate >> volatility;    
+double price_american_put(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde) {
+    // create option
+    AmericanPutOption option(strike, rate, volatility);
+
+    // determine discretization precision
+    double t_dom = time_to_maturity, x_dom = 4 * strike; // 4 * strike is usually enough for the boundary conditions to hold approximately
+    size_t M = 5000, N = 100;
+
+    // solve pde and get the last line (which corresponds to prices for all spots and given time_to_maturity)
+    BSAmericanImplicit solve_pde(x_dom, M, t_dom, N, &option);
+
+    return price_aux(spot, solve_pde, output_pde);
+}
+
+
+
+
+
+
+
+
+
+
+
+// "BONUS" FUNCTIONS
+
+
+/**
+ * @brief Get the Put Price From Call Price using Put Call parity
+ * 
+ * @param callPrice 
+ * @param spot 
+ * @param time 
+ * @param rate 
+ * @param strike 
+ */
+double getPutPriceFromCallPrice(double call_price, double spot, double time_to_maturity, double rate, double strike) {
+    return call_price - spot + exp(-rate * time_to_maturity) * strike;
+}
+
+void getPutPricesFromCallFile(std::string call_prices_file, double rate, double strike, std::string output_file) {
+    std::fstream call_prices_stream(call_prices_file, std::ios::in);
+    std::ofstream put_out(output_file);
+
+    while(call_prices_stream) {
+        double spot, time_to_maturity, call_price;           
+
+        call_prices_stream >> spot >> time_to_maturity >> call_price;    
+
+        double put_price = getPutPriceFromCallPrice(call_price, spot, time_to_maturity, rate, strike);
+        put_out << spot << ' ' << time_to_maturity << ' ' << put_price << std::endl;
     }
 
-    params_stream.close();
-}
-
-
-void create_output_file(std::string filename, Output output) {
-    std::ofstream put_out(filename);
-    put_out << output.price << '\n';
-    put_out << output.delta << '\n';
-
     put_out.close();
+    call_prices_stream.close();
 }
+

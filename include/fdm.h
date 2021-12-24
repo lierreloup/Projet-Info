@@ -95,4 +95,20 @@ class BSAmericanImplicitUniform : public FDMBase {
   ~BSAmericanImplicitUniform() { delete no_early_exercise_pde; }
 
 };
+
+class BSAmericanImplicit : public FDMBase {
+  BlackScholesPDE const * no_early_exercise_pde;
+
+ public:
+  BSAmericanImplicit(double _x_dom, size_t _M,
+                   double _t_dom, size_t _N,
+                   AmericanOption * american_option);
+  
+  ConvectionDiffusionPDE const * get_pde() { return no_early_exercise_pde; }
+
+  std::vector<double> step_march(std::string output_file) override;
+
+  ~BSAmericanImplicit() { delete no_early_exercise_pde; }
+
+};
 #endif

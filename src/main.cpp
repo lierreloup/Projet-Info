@@ -2,65 +2,29 @@
 #include "../include/pde.h"
 #include "../include/fdm.h"
 #include "../include/pricers.h"
+#include "../include/vba_interface.h"
 
 #include <iostream>
 
 int main(int argc, char **argv) {
 
-  //argv[0] is the name of a file which contains arguments
-  double s, t, K, r, v;
+  //argv[1] is the name of a file which contains arguments
+  Input input = get_params_from_file(argv[1]);
 
-  set_params_from_file(argv[0], s, t, K, r, v);
+  //TODO : in file vba_interface, define a function which selects the right pricer according to vba input
 
-  double price = price_european_call(s, t, K, r, v);
+  double price = price_european_call(
+    input.strike
+    , input.time_to_maturity
+    , input.strike
+    , input.rate
+    , input.volatility
+  );
 
   Output output;
   output.price = price;
   output.delta = 0xbadc0de;
-  create_output_file("out", output);
-
-  /*
-  // Create the option parameters
-  double K = 0.5;  // Strike price
-  double r = 0.05;   // Risk-free rate (5%)
-  double v = 0.2;    // Volatility of the underlying (20%)
-  double T = 1.00;    // One year until expiry
-
-  // FDM discretisation parameters
-  double x_dom = 1;       // Spot goes from [0.0, 1.0]
-  size_t M = 20;
-  double t_dom = T;         // Time period as for the option
-  size_t N = 20;     
-*/
-  // Create the PayOff and Option objects
-  //PayOff* pay_off_call = new PayOffCall(K);
-  //EuropeanCallOption* call_option = new EuropeanCallOption(K, r, T, v);
-
-  // Create the PDE and FDM objects
-  //BlackScholesPDE* bs_pde = new BlackScholesPDE(call_option);
-  //BSEuroImplicit fdm_euler(x_dom, M, t_dom, N, call_option);
-
-  //AmericanOptionParameters call_params;
-  //call_params.no_early_exercise_pde = bs_pde;
-/*
-  AmericanCallOption american_call = AmericanCallOption(K, r, v);
-  BSAmericanImplicitUniform american_pricer(x_dom, M, t_dom, N, &american_call);
-
-  american_pricer.step_march("american_call_refactor.csv");
-*/
-  // Run the FDM solver
-  //fdm_euler.step_march("call_fdm_implicit_refactor.csv");
-  //price.step_march("america.csv");
-
-  // Compute Put Price
-  //put call parity works pretty bad
-  //getPutPricesFromCallFile("call_fdm_implicit_backwards.csv", T, r, K, "put_fdm_implicit");
-
-  // Delete the PDE, PayOff and Option objects
-  //delete bs_pde; //TODO : move to proper destructors
-  //delete call_option;
-
-  //delete pay_off_call; // TODO : move to proper destructors
+  create_output_file("out_eu_call", output);
 
   return 0;
 }

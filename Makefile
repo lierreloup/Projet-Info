@@ -12,8 +12,11 @@ obj/option.o : src/option.cpp include/option.h
 obj/pde.o : src/pde.cpp include/pde.h include/option.h
 	$(CCO) $< -o $@
 
-obj/pricers.o : src/pricers.cpp
+obj/pricers.o : src/pricers.cpp include/pricers.h
 	$(CCO) $< -o $@
 
-bin/price : obj/pde.o obj/option.o obj/fdm.o obj/pricers.o src/main.cpp 
+obj/vba_interface.o : src/vba_interface.cpp include/vba_interface.h
+	$(CCO) $< -o $@
+
+bin/price : obj/pde.o obj/option.o obj/fdm.o obj/pricers.o obj/vba_interface.o src/main.cpp 
 	$(CC) $^ -o bin/price

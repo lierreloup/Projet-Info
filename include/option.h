@@ -69,7 +69,6 @@ class EuropeanCallOption : public EuropeanOption {
   double option_price_for_big_spot(double time, double spot) const;
   double option_price_at_maturity(double spot) const;
 
-  //EuropeanCallOption();
   EuropeanCallOption(double _K, double _r,
                 double _sigma);
   
@@ -82,7 +81,6 @@ class EuropeanPutOption : public EuropeanOption {
   double option_price_for_big_spot(double time, double spot) const;
   double option_price_at_maturity(double spot) const;
 
-  //EuropeanPutOption();
   EuropeanPutOption(double _K, double _r,
                 double _sigma);
   
@@ -95,8 +93,20 @@ class AmericanCallOption : public AmericanOption {
   double option_price_for_big_spot(double time, double spot) const;
   double option_price_at_maturity(double spot) const;
 
-  //AmericanCallOption();
   AmericanCallOption(double _K, double _r,
+                double _sigma);
+  
+};
+
+class AmericanPutOption : public AmericanOption {
+ public:
+
+  double option_price_for_0_spot(double time) const;
+  double option_price_for_big_spot(double time, double spot) const;
+  double option_price_at_maturity(double spot) const;
+
+  //AmericanCallOption();
+  AmericanPutOption(double _K, double _r,
                 double _sigma);
   
 };
