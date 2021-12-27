@@ -93,7 +93,7 @@ double price_european_call(double spot, double time_to_maturity, double strike, 
 
     // determine discretization precision
     double t_dom = time_to_maturity, x_dom = 4 * strike; // 4 * strike is usually enough for the boundary conditions to hold approximately
-    size_t M = 100, N = 100;
+    size_t M = 200, N = 200;
 
     // instantiate pde solver
     BSEuroImplicit solve_pde(x_dom, M, t_dom, N, &option);

@@ -141,7 +141,6 @@ std::vector<double> & store_boundary_conditions(double prev_t, std::vector<doubl
   return new_result; // return the reference to the result array in case we need to affect it to a variable
 }
 
-// TODO : maybe rename "implicit Euler" as "BSImplicitEuler" because the scheme does'nt work for all convection PDEs
 std::vector<double> & increment_european_price(std::vector<double> const & x_values, double dt, double prev_t, ConvectionDiffusionPDE const * pde, std::vector<double> & old_result, std::vector<double> & new_result) {
   size_t M = new_result.size() - 1; // results range from 0 to N
 
@@ -233,7 +232,7 @@ std::vector<double> step_march_aux(std::string output_file, BlackScholesPDE cons
     double dt = cur_t - prev_t;
 
     store_boundary_conditions(
-      prev_t
+      cur_t
       , x_values
       , pde
       , new_result
