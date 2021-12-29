@@ -109,6 +109,7 @@ double theta_option(double spot, double time_to_maturity, double strike, double 
     double Price_S2 = price_american_put(spot,time_to_maturity+h, strike, rate, volatility, output_pde);
     return((Price_S2-Price_S1)/h);
   };
+  return 0.0;
 }
 
 
@@ -146,6 +147,7 @@ double rho_option(double spot, double time_to_maturity, double strike, double ra
     double Price_S2 = price_american_put(spot,time_to_maturity, strike, rate+h, volatility, output_pde);
     return((Price_S2-Price_S1)/h);
   };
+  return 0.0;
 }
 
 
@@ -183,5 +185,6 @@ double vega_option(double spot, double time_to_maturity, double strike, double r
     double Price_S2 = price_american_put(spot,time_to_maturity, strike, rate, volatility+h, output_pde);
     return((Price_S2-Price_S1)/h);
   };
+  return 0.0;
 }
 #endif
