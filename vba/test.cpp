@@ -2,7 +2,7 @@
 #include <fstream>
 int main() {
     // Create an output filestream object
-    std::ofstream myFile("foo.csv");
+    std::ofstream myFile("C:\\Users\\UTILISATEUR\\projects\\Projet-Info\\vba\\foo.csv");
     
     // Send data to the stream
     myFile << "Foo\n";
@@ -15,3 +15,4 @@ int main() {
     
     return 0;
 }
+
