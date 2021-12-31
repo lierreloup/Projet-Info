@@ -26,3 +26,6 @@ obj/vba_interface.o : src/vba_interface.cpp include/vba_interface.h
 
 bin/price : obj/pde.o obj/option.o obj/fdm.o obj/pricers.o obj/greeks.o obj/graph_builder.o obj/vba_interface.o src/main.cpp 
 	$(CC) $^ -o bin/price
+
+tests : src/tests.cpp src/fdm_static.cpp
+	$(CC) $< -o bin/tests -lcriterion
