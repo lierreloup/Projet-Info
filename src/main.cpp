@@ -9,6 +9,10 @@
 
 int main(int argc, char **argv) {
 
+  try
+  {
+
+  
   //argv[1] is the name of a file which contains arguments
   Input input = get_params_from_file(argv[1]);
   
@@ -16,7 +20,8 @@ int main(int argc, char **argv) {
   
   //TODO : in file vba_interface, define a function which selects the right pricer according to vba input
  
-   Price_graph(input.spot, input.time_to_maturity, input.strike, input.rate, input.volatility, "european_call.csv", "european_call");
+  Price_graph(input.spot, input.time_to_maturity, input.strike, input.rate, input.volatility, "european_call.csv", "european_call");
+  
   
   double price = price_european_call(
     input.strike
@@ -25,11 +30,15 @@ int main(int argc, char **argv) {
     , input.rate
     , input.volatility
   );
-
   Output output;
   output.price = price;
   output.delta = 0xbadc0de;
   create_output_file("out_eu_call", output);
-
+  
+  }
+  catch(const std::exception& e)
+  {
+    std::cerr << e.what() << '\n';
+  }
   return 0;
 }

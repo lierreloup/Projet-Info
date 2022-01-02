@@ -3,6 +3,8 @@ CCO = $(CC) -c
 
 all : bin/price
 
+#obj/fdm_static.o :
+
 obj/fdm.o : src/fdm.cpp include/fdm.h include/pde.h
 	$(CCO) $< -o $@
 
@@ -27,5 +29,10 @@ obj/vba_interface.o : src/vba_interface.cpp include/vba_interface.h
 bin/price : obj/pde.o obj/option.o obj/fdm.o obj/pricers.o obj/greeks.o obj/graph_builder.o obj/vba_interface.o src/main.cpp 
 	$(CC) $^ -o bin/price
 
-tests : src/tests.cpp src/fdm_static.cpp
-	$(CC) $< -o bin/tests -lcriterion
+bin/test_fdm : src/test_fdm.cpp src/fdm_static.cpp
+	$(CC) $< -o bin/test_fdm -lcriterion
+
+bin/test_pricers : src/test_pricers.cpp obj/pde.o obj/option.o obj/fdm.o obj/pricers.o
+	$(CC) $^ -o bin/test_pricers -lcriterion
+
+tests : bin/test_fdm bin/test_pricers

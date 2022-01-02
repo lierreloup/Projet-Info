@@ -1,3 +1,6 @@
+#ifndef __PRICERS_CPP
+#define __PRICERS_CPP
+
 #include "../include/option.h"
 #include "../include/pde.h"
 #include "../include/fdm.h"
@@ -7,6 +10,7 @@
 #include <string>
 #include <iostream>
 #include <stdexcept>      // std::invalid_argument
+#include <limits>
 
 /**
  * @brief finds indices in x_values such that x_values[left_index] <= target <= x_values[right_index] 
@@ -16,7 +20,7 @@
  * @param left_index 
  * @param right_index
  * 
- * @attention if target = last value of x_values, right_index is set to -1
+ * @attention if target = last value of x_values, right_index is set to max size_t
  * @throws std::invalid_argument
  */
 void closest(std::vector<double> x_values, double target, size_t & left_index, size_t & right_index) {
@@ -32,7 +36,7 @@ void closest(std::vector<double> x_values, double target, size_t & left_index, s
 
     // rare case : the last x value is actually the target value
     if (target == x_values[I-1]) {
-        left_index = I-1, right_index = -1;
+        left_index = I-1, right_index = std::numeric_limits<size_t>::max();;
     }
 
     // exception case : no interval was found
@@ -77,7 +81,7 @@ double price_aux(double spot, FDMBase & solve_pde, std::string output_pde) {
     closest(spot_values, spot, left_index, right_index);
 
     // rare case where the last value is the target
-    if (right_index == -1) return prices_at_time_to_maturity[left_index];
+    if (right_index == std::numeric_limits<size_t>::max()) return prices_at_time_to_maturity[left_index];
 
     // interpolate to find price
     double left_price = prices_at_time_to_maturity[left_index]
@@ -90,13 +94,14 @@ double price_aux(double spot, FDMBase & solve_pde, std::string output_pde) {
 double price_european_call(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde) {
     // create option
     EuropeanCallOption option(strike, rate, volatility);
-
+    std::cout << 1;
     // determine discretization precision
     double t_dom = time_to_maturity, x_dom = 4 * strike; // 4 * strike is usually enough for the boundary conditions to hold approximately
     size_t M = 200, N = 200;
 
     // instantiate pde solver
     BSEuroImplicit solve_pde(x_dom, M, t_dom, N, &option);
+    std::cout << 2;
 
     //solve and interpolate
     return price_aux(spot, solve_pde, output_pde);
@@ -185,3 +190,4 @@ void getPutPricesFromCallFile(std::string call_prices_file, double rate, double 
     call_prices_stream.close();
 }
 
+#endif

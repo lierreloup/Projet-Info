@@ -7,6 +7,7 @@
 #include <math.h>
 #include "../include/pde.h"
 #include "../include/fdm.h"
+//#include "../include/fdm_static.h"
 
 // Diagonal coefficients of the tridiagonal matrix A in implicit resolution
 double compute_d(size_t n, double a, double b) {
@@ -159,7 +160,6 @@ std::vector<double> & increment_european_price(std::vector<double> const & x_val
   for (size_t m=2; m <= M-1; m++) {
     upper.at(m-2) = compute_u(m, a_coeff, b_coeff); // u indices go from 2 to M-1
   }
-
 
   // Define vector b
   std::vector<double> b = compute_b(old_result, new_result.at(0), new_result.at(M), compute_l(0, a_coeff, b_coeff), compute_u(M, a_coeff, b_coeff));

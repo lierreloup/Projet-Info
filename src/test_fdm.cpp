@@ -3,15 +3,13 @@
 #include <bits/stdc++.h>
 #include <math.h>
 
+#include "test_utils.cpp"
+
+//
 
 // LINEAR SYSTEM SOLVING
 
-std::vector<double> rand_vals(size_t n) {
-    std::vector<double> v(n);
-    generate(v.begin(), v.end(), rand);
 
-    return v;
-}
 
 /**
  * @brief matrix product between a tridiagonal matrix and a vector
@@ -25,8 +23,6 @@ std::vector<double> rand_vals(size_t n) {
 std::vector<double> tridiagonal_product(std::vector<double> lower, std::vector<double> diagonal, std::vector<double> upper, std::vector<double> multiplied_vector) {
     try
     {
-
-    
     size_t n = diagonal.size();
     std::vector<double> result(n);
 
@@ -48,6 +44,14 @@ std::vector<double> tridiagonal_product(std::vector<double> lower, std::vector<d
     }
 }
 
+/**
+ * @brief determinant of a tridiagonal matrix
+ * 
+ * @param lower 
+ * @param diagonal 
+ * @param upper 
+ * @return double 
+ */
 double tridiagonal_determinant(std::vector<double> lower, std::vector<double> diagonal, std::vector<double> upper) {
 
     size_t size = diagonal.size();
@@ -63,6 +67,10 @@ double tridiagonal_determinant(std::vector<double> lower, std::vector<double> di
     return fn_min_1;
 }
 
+/**
+ * @brief all necessary info for linear system solving test
+ * 
+ */
 struct tri_test {
     std::vector<double> lower,
         diagonal,
@@ -145,6 +153,4 @@ Test(fdm, tridiagonal_system_solver) {
         cr_assert(eucdist(found_x, tst.x) < tol);
     }
 }
-
-
 
