@@ -96,12 +96,11 @@ double price_european_call(double spot, double time_to_maturity, double strike, 
     EuropeanCallOption option(strike, rate, volatility);
     std::cout << 1;
     // determine discretization precision
-    double t_dom = time_to_maturity, x_dom = 4 * strike; // 4 * strike is usually enough for the boundary conditions to hold approximately
+    double t_dom = time_to_maturity, x_dom = 4 * std::max(strike * exp(-rate * time_to_maturity), spot); // is usually enough for the boundary conditions to hold approximately
     size_t M = 200, N = 200;
 
     // instantiate pde solver
     BSEuroImplicit solve_pde(x_dom, M, t_dom, N, &option);
-    std::cout << 2;
 
     //solve and interpolate
     return price_aux(spot, solve_pde, output_pde);

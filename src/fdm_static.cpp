@@ -129,8 +129,10 @@ std::vector<double> compute_b(std::vector<double> & old_result, double new_resul
 std::vector<double> & store_boundary_conditions(double prev_t, std::vector<double> const & x_values, ConvectionDiffusionPDE const * pde, std::vector<double> & new_result) {
   size_t M = new_result.size() - 1;
   new_result.at(0) = pde->boundary_left(prev_t, x_values[0]);
+  std::cout << "Boundary condition at 0 " << new_result.at(0); 
   new_result.at(M) = pde->boundary_right(prev_t, x_values[M]);
 
+  std::cout << "Boundary condition at inf " << new_result.at(M); 
   return new_result; // return the reference to the result array in case we need to affect it to a variable
 }
 
@@ -166,7 +168,8 @@ std::vector<double> & increment_european_price(std::vector<double> const & x_val
  
   // Solve A v = b
   Thomas_solver(lower, diagonal, upper, b, new_result, 1, M-1);
-  
+
+  std::cout << " Terminal new_result : " << new_result.at(M) << '\n';
   // Set result value equal to v
   return new_result; // return the reference to the result array in case we need to affect it to a variable
 
@@ -188,6 +191,7 @@ void BS_initial_conditions(size_t M, std::vector<double> & old_result, std::vect
   for (size_t m=0; m <= M; m++) {
     double cur_spot = x_values.at(m);
     old_result.at(m) = pde->init_cond(cur_spot);
+  
   }
   prev_t = 0;
   cur_t = 0;

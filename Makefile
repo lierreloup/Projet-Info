@@ -5,7 +5,7 @@ all : bin/price
 
 #obj/fdm_static.o :
 
-obj/fdm.o : src/fdm.cpp include/fdm.h include/pde.h
+obj/fdm.o : src/fdm.cpp include/fdm.h include/pde.h src/fdm_static.cpp
 	$(CCO) $< -o $@
 
 obj/option.o : src/option.cpp include/option.h 
@@ -29,8 +29,8 @@ obj/vba_interface.o : src/vba_interface.cpp include/vba_interface.h
 bin/price : obj/pde.o obj/option.o obj/fdm.o obj/pricers.o obj/greeks.o obj/graph_builder.o obj/vba_interface.o src/main.cpp 
 	$(CC) $^ -o bin/price
 
-bin/test_fdm : src/test_fdm.cpp src/fdm_static.cpp
-	$(CC) $< -o bin/test_fdm -lcriterion
+bin/test_fdm : src/test_fdm.cpp src/fdm_static.cpp obj/pde.o obj/option.o
+	$(CC) $< obj/pde.o obj/option.o -o bin/test_fdm -lcriterion
 
 bin/test_pricers : src/test_pricers.cpp obj/pde.o obj/option.o obj/fdm.o obj/pricers.o
 	$(CC) $^ -o bin/test_pricers -lcriterion

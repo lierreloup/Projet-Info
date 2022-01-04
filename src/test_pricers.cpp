@@ -6,36 +6,7 @@
 //
 // EUROPEAN PRICING
 
-double normalCDF(double value)
-{
-   return 0.5 * erfc(-value * M_SQRT1_2);
-}
 
-double d(double plus_or_minus, double underlying, double strike, double rate, double volatility, double time_to_maturity) {
-    double top_left = log(underlying/strike),
-    top_right = (rate + plus_or_minus * volatility * volatility / 2) * time_to_maturity,
-    bottom = volatility * sqrt(time_to_maturity);
-
-    return (top_left + top_right) / bottom;
-}
-
-double BS_call(double underlying, double strike, double rate, double volatility, double time_to_maturity) {
-    double d1 = d(+1, underlying, strike, rate, volatility, time_to_maturity),
-    d2 = d(-1, underlying, strike, rate, volatility, time_to_maturity),
-    left = underlying * normalCDF(d1),
-    right = strike * exp(-rate * time_to_maturity) * normalCDF(d2);
-
-    return left - right;
-}
-
-double BS_put(double underlying, double strike, double rate, double volatility, double time_to_maturity) {
-    double d1 = d(+1, underlying, strike, rate, volatility, time_to_maturity),
-    d2 = d(-1, underlying, strike, rate, volatility, time_to_maturity),
-    left = strike * exp(-rate * time_to_maturity) * normalCDF(-d2),
-    right = underlying * normalCDF(-d1);
-
-    return left - right;
-}
 
 struct prices_test {
     double underlying,
@@ -48,14 +19,26 @@ struct prices_test {
     ;
 };
 
+void print_prices_test(prices_test tst) {
+    std::cout << "Underlying : " << tst.underlying;
+    std::cout << "\nTime to maturity : " << tst.time_to_maturity;
+    std::cout << "\nStrike : " << tst.strike;
+    std::cout << "\nRate : " << tst.rate;
+    std::cout << "\nVolatility : " << tst.volatility;
+
+    std::cout << "\nPrice : " << tst.price;
+    std::cout << "\nTheoretical price : " << tst.theoretical_price;
+
+}
+
 
 
 prices_test generate_pricing_test(std::string option_type, double upper_bound) {
     prices_test tst;
     tst.underlying = random_float(upper_bound) + upper_bound / 2, // we add half the uuper bound to get a positive number
     tst.strike = random_float(upper_bound) + upper_bound / 2,
-    tst.rate = random_float(upper_bound),
-    tst.volatility = random_float(upper_bound) + upper_bound / 2,
+    tst.rate = random_float(upper_bound) / 100,
+    tst.volatility = (random_float(upper_bound) + upper_bound / 2) / 100,
     tst.time_to_maturity = random_float(upper_bound)  + upper_bound / 2;
 
     tst.price = 
@@ -96,6 +79,7 @@ prices_test generate_pricing_test(std::string option_type, double upper_bound) {
             )
     ;
 
+    print_prices_test(tst);
     return tst;
 }
 

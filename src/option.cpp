@@ -31,7 +31,8 @@ double EuropeanCallOption::option_price_for_0_spot(double time_to_maturity) cons
 }
 
 double european_call_price_for_big_spot(double time_to_maturity, double spot, double strike, double rate) {
-  return spot - strike * exp(-rate * time_to_maturity);
+  return std::max(spot - strike * exp(-rate * time_to_maturity), 0.); // the "max" is essential in case of negative rates
+  //return spot;
 }
 
 double EuropeanCallOption::option_price_for_big_spot(double time_to_maturity, double spot) const {
