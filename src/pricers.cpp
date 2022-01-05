@@ -90,64 +90,82 @@ double price_aux(double spot, FDMBase & solve_pde, std::string output_pde) {
     return interpolate(spot, spot_values[left_index], left_price, spot_values[right_index], right_price);
 }
 
-
-double price_european_call(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde) {
+double price_european_call(price_inputs in, std::string output_pde) {
     // create option
-    EuropeanCallOption option(strike, rate, volatility);
-    std::cout << 1;
+    EuropeanCallOption option(in.strike, in.rate, in.volatility);
     // determine discretization precision
-    double t_dom = time_to_maturity, x_dom = 4 * std::max(strike * exp(-rate * time_to_maturity), spot); // is usually enough for the boundary conditions to hold approximately
-    size_t M = 200, N = 200;
+    double t_dom = in.time_to_maturity; //, x_dom = 4 * std::max(in.strike * exp(-rate * time_to_maturity), spot); // is usually enough for the boundary conditions to hold approximately
 
+    std::cout << " N in price " << in.N << '\n';
     // instantiate pde solver
-    BSEuroImplicit solve_pde(x_dom, M, t_dom, N, &option);
+    BSEuroImplicit solve_pde(t_dom, in.N, &option, *in.disc);
 
     //solve and interpolate
-    return price_aux(spot, solve_pde, output_pde);
+    return price_aux(in.spot, solve_pde, output_pde);
 }
 
-double price_european_put(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde) {
-    EuropeanPutOption option(strike, rate, volatility);
+double price_european_put(price_inputs in, std::string output_pde) {
+    EuropeanPutOption option(in.strike, in.rate, in.volatility);
+    double t_dom = in.time_to_maturity; 
 
-    double t_dom = time_to_maturity, x_dom = 4 * strike; // 4 * strike is usually enough for the boundary conditions to hold approximately
-    size_t M = 1000, N = 100;
 
-    BSEuroImplicit solve_pde(x_dom, M, t_dom, N, &option);
+    // instantiate pde solver
+    BSEuroImplicit solve_pde(t_dom, in.N, &option, *in.disc);
 
-    return price_aux(spot, solve_pde, output_pde);
+    return price_aux(in.spot, solve_pde, output_pde);
 }
 
-double price_american_call(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde) {
+double price_american_call(price_inputs in, std::string output_pde) {
     // create option
-    AmericanCallOption option(strike, rate, volatility);
+    AmericanCallOption option(in.strike, in.rate, in.volatility);
 
-    // determine discretization precision
-    double t_dom = time_to_maturity, x_dom = 4 * strike; // 4 * strike is usually enough for the boundary conditions to hold approximately
-    size_t M = 100, N = 100;
+    double t_dom = in.time_to_maturity;
 
     // solve pde and get the last line (which corresponds to prices for all spots and given time_to_maturity)
-    BSAmericanImplicit solve_pde(x_dom, M, t_dom, N, &option);
+    BSAmericanImplicit solve_pde(t_dom, in.N, &option, *in.disc);
 
-    return price_aux(spot, solve_pde, output_pde);
+    return price_aux(in.spot, solve_pde, output_pde);
 }
 
 
-double price_american_put(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde) {
+double price_american_put(price_inputs in, std::string output_pde) {
     // create option
-    AmericanPutOption option(strike, rate, volatility);
+    AmericanPutOption option(in.strike, in.rate, in.volatility);
 
-    // determine discretization precision
-    double t_dom = time_to_maturity, x_dom = 4 * strike; // 4 * strike is usually enough for the boundary conditions to hold approximately
-    size_t M = 5000, N = 100;
+    double t_dom = in.time_to_maturity;
 
     // solve pde and get the last line (which corresponds to prices for all spots and given time_to_maturity)
-    BSAmericanImplicit solve_pde(x_dom, M, t_dom, N, &option);
+    BSAmericanImplicit solve_pde(t_dom, in.N, &option, *in.disc);
 
-    return price_aux(spot, solve_pde, output_pde);
+    return price_aux(in.spot, solve_pde, output_pde);
 }
 
+UniformDiscretization default_UniformDiscretization(price_inputs in) {
+    double x_dom = 3 * std::max(in.spot, exp(-in.rate * in.time_to_maturity));
+    size_t M = std::min(x_dom * 10, 1e3);
 
+    UniformDiscretization disc(x_dom, M);
+    return disc;
+}
 
+NonUniformDiscretization default_NonUniformDiscretization(price_inputs in) {
+    double x_dom = 3 * std::max(in.spot, exp(-in.rate * in.time_to_maturity));
+    size_t M = std::min(static_cast<size_t>(x_dom * 10.), static_cast<size_t>(1e4));
+
+    double disc_center = in.strike
+        , c = in.strike / 3.
+    ;
+
+    NonUniformDiscretization disc(x_dom, M, disc_center, c);
+    return disc;
+}
+
+size_t default_N(price_inputs in) {
+    double result = std::min(in.time_to_maturity * 10., 1e3);
+    std::cout << " in default " << result << '\n';
+
+    return static_cast<size_t>(result);
+}
 
 
 

@@ -2,7 +2,19 @@
 #define __PRICERS_H
 
 #include <string>
+#include "discretization.h"
 
+struct price_inputs {
+    double spot
+        , time_to_maturity
+        , strike
+        , rate
+        , volatility
+    ;
+
+    Discretization * disc; // here we use a pointer so we don't have to make a constructor for price_inputs (wouldn't work for a reference)
+    size_t N;
+};
 
 /**
  * @brief get price for european call
@@ -15,7 +27,7 @@
  * @param output_pde 
  * @return double 
  */
-double price_european_call(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde = "european_call.csv");
+double price_european_call(price_inputs in, std::string output_pde = "european_call.csv");
 
 /**
  * @brief get price for european put
@@ -28,7 +40,7 @@ double price_european_call(double spot, double time_to_maturity, double strike, 
  * @param output_pde 
  * @return double 
  */
-double price_european_put(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde = "european_put.csv");
+double price_european_put(price_inputs in, std::string output_pde = "european_put.csv");
 
 /**
  * @brief get price for american call
@@ -41,7 +53,7 @@ double price_european_put(double spot, double time_to_maturity, double strike, d
  * @param output_pde 
  * @return double 
  */
-double price_american_call(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde = "american_call.csv");
+double price_american_call(price_inputs in, std::string output_pde = "american_call.csv");
 
 /**
  * @brief get price for american put
@@ -54,9 +66,13 @@ double price_american_call(double spot, double time_to_maturity, double strike, 
  * @param output_pde 
  * @return double 
  */
-double price_american_put(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde = "american_put.csv");
+double price_american_put(price_inputs in, std::string output_pde = "american_put.csv");
 
+UniformDiscretization default_UniformDiscretization(price_inputs in);
 
+NonUniformDiscretization default_NonUniformDiscretization(price_inputs in);
+
+size_t default_N(price_inputs in);
 
 // "BONUS" functions
 

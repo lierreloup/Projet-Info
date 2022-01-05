@@ -3,9 +3,10 @@ CCO = $(CC) -c
 
 all : bin/price
 
-#obj/fdm_static.o :
+obj/discretization.o : src/discretization.cpp
+	$(CCO) $< -o $@
 
-obj/fdm.o : src/fdm.cpp include/fdm.h include/pde.h src/fdm_static.cpp
+obj/fdm.o : src/fdm.cpp include/fdm.h include/pde.h include/discretization.h src/fdm_static.cpp
 	$(CCO) $< -o $@
 
 obj/option.o : src/option.cpp include/option.h 
@@ -26,13 +27,13 @@ obj/graph_builder.o : src/graph_builder.cpp include/graph_builder.h
 obj/vba_interface.o : src/vba_interface.cpp include/vba_interface.h
 	$(CCO) $< -o $@
 
-bin/price : obj/pde.o obj/option.o obj/fdm.o obj/pricers.o obj/greeks.o obj/graph_builder.o obj/vba_interface.o src/main.cpp 
+bin/price : obj/pde.o obj/option.o obj/discretization.o obj/fdm.o obj/pricers.o obj/greeks.o obj/graph_builder.o obj/vba_interface.o src/main.cpp 
 	$(CC) $^ -o bin/price
 
-bin/test_fdm : src/test_fdm.cpp src/fdm_static.cpp obj/pde.o obj/option.o
-	$(CC) $< obj/pde.o obj/option.o -o bin/test_fdm -lcriterion
+bin/test_fdm : src/test_fdm.cpp src/fdm_static.cpp obj/pde.o obj/option.o obj/discretization.o
+	$(CC) $< obj/pde.o obj/option.o obj/discretization.o -o bin/test_fdm -lcriterion
 
-bin/test_pricers : src/test_pricers.cpp obj/pde.o obj/option.o obj/fdm.o obj/pricers.o
+bin/test_pricers : src/test_pricers.cpp obj/pde.o obj/option.o obj/fdm.o obj/discretization.o obj/pricers.o
 	$(CC) $^ -o bin/test_pricers -lcriterion
 
 tests : bin/test_fdm bin/test_pricers

@@ -56,5 +56,13 @@ double BS_put(double underlying, double strike, double rate, double volatility, 
     return left - right;
 }
 
+void print_vector(std::vector<double> v) {
+    std::cout << "[ ";
+    for (size_t i = 0; i < v.size(); i++)
+    {
+        std::cout << " " << v.at(i);
+    }
+    std::cout << "]\n";
+}
 
 #endif

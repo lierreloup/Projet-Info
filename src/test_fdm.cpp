@@ -234,15 +234,6 @@ increment_test increment_old_result(vec x_values, double dt, double upper_bound)
     return tst;
 }
 
-void print_vector(vec v) {
-    std::cout << "[ ";
-    for (size_t i = 0; i < v.size(); i++)
-    {
-        std::cout << " " << v.at(i);
-    }
-    std::cout << "]\n";
-}
-
 void print_increment_test(increment_test tst) {
     std::cout << "\nStrike : " << tst.strike;
     std::cout << "\nRate : " << tst.rate;

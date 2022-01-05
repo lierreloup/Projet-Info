@@ -7,7 +7,6 @@
 #include <math.h>
 #include "../include/pde.h"
 #include "../include/fdm.h"
-//#include "../include/fdm_static.h"
 
 // Diagonal coefficients of the tridiagonal matrix A in implicit resolution
 double compute_d(size_t n, double a, double b) {
@@ -175,16 +174,6 @@ std::vector<double> & increment_european_price(std::vector<double> const & x_val
 
 }
 
-std::vector<double> get_uniform_x_grid(size_t M, double dx) {
-  std::vector<double> x_values(M+1);
-
-  for (size_t m=0; m <= M; m++) {
-    double cur_spot = static_cast<double>(m) * dx;
-    x_values.at(m) = cur_spot;
-  }
-
-  return x_values;
-}
 
 void BS_initial_conditions(size_t M, std::vector<double> & old_result, std::vector<double> & new_result, std::vector<double> const & x_values, ConvectionDiffusionPDE const * pde, double & prev_t, double & cur_t) {
 
@@ -265,31 +254,6 @@ std::vector<double> step_march_aux(std::string output_file, BlackScholesPDE cons
   }
  
 }
-/*
-  * Solve the PDE for all time steps and space steps
-*/
-std::vector<double> step_march_uniform(std::string output_file, double x_dom, size_t M,
-                   double t_dom, size_t N, BlackScholesPDE const * pde, increment_function increment_price, NecessaryResults & results) {
-  
-  double dx = x_dom/static_cast<double>(M);
-  double dt = t_dom/static_cast<double>(N);
-
-  std::vector<double> x_values = get_uniform_x_grid(M, dx);
-  results.x_values = std::vector<double>(x_values);
-  std::vector<double> time_to_maturity_values = get_uniform_x_grid(N, dt);
-  results.t_values = std::vector<double>(time_to_maturity_values);
-
-  return step_march_aux(
-    output_file
-    , pde
-    , M
-    , N
-    , x_values
-    , time_to_maturity_values
-    , increment_price
-  );
-}
-
 
 //calculate line exactly like european option, then check if Vm+1 - Vm strictly greater than 0 (in which case set to 0)
 std::vector<double> & increment_american_price(std::vector<double> const & x_values, double dt, double prev_t, ConvectionDiffusionPDE const * pde, std::vector<double> & old_result, std::vector<double> & new_result) {
@@ -327,44 +291,20 @@ std::vector<double> & increment_american_price(std::vector<double> const & x_val
   return new_result;
 }
 
+std::vector<double> step_march_function(std::string output_file,
+                   double t_dom, size_t N, BlackScholesPDE const * pde, increment_function increment_price, NecessaryResults & results, Discretization const & disc) {
 
 
-// NON UNIFORM DISCRETIZATION
-
-double compute_delta_eta(double M, double x_dom, double K, double c) {
-  return (
-    asinh((x_dom - K) / c) - asinh(-K / c)
-  ) / (
-    M
-  );
-}
-
-double compute_eta(double i, double K, double c, double delta_eta) {
-  return asinh(-K / c) + i * delta_eta;
-}
-
-std::vector<double> get_non_uniform_grid(size_t M, double x_dom, double K, double c) {
-  std::vector<double> x_values(M+1);
-  double delta_eta = compute_delta_eta(static_cast<double>(M), x_dom, K, c);
-
-  for (size_t i = 0; i <= M; i++) {
-    double eta_i = compute_eta(static_cast<double> (i), K, c, delta_eta);
-    x_values.at(i) = K + c * sinh(eta_i);
-  }
-
-  return x_values;
-}
-
-std::vector<double> step_march_non_uniform(std::string output_file, double x_dom, size_t M,
-                   double t_dom, size_t N, BlackScholesPDE const * pde, increment_function increment_price, NecessaryResults & results) {
-  
   double dt = t_dom/static_cast<double>(N);
-
-  // values for K and c come from the Hout-Foulon article
-  std::vector<double> x_values = get_non_uniform_grid(M, x_dom, pde->option->K, pde->option->K/5);
-  results.x_values = std::vector<double>(x_values);
+    std::cout << "final index " <<  N << '\n';
   std::vector<double> time_to_maturity_values = get_uniform_x_grid(N, dt);
-  results.t_values = std::vector<double>(time_to_maturity_values);
+
+  std::cout << "final time" <<  time_to_maturity_values.at(N) << '\n';
+  
+  std::vector<double> x_values = disc.get_grid();
+  results.x_values = std::vector<double>(x_values);
+
+  size_t M = disc.get_M();
 
   return step_march_aux(
     output_file
@@ -376,7 +316,5 @@ std::vector<double> step_march_non_uniform(std::string output_file, double x_dom
     , increment_price
   );
 }
-
-
 
 #endif

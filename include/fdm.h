@@ -2,6 +2,7 @@
 #define __FDM_H
 
 #include "../include/pde.h"
+#include "discretization.h"
 #include <vector>
 #include <string> 
 
@@ -12,7 +13,6 @@
  */
 struct NecessaryResults {
   std::vector<double> x_values;
-  std::vector<double> t_values;
 };
 
 
@@ -21,16 +21,16 @@ class FDMBase {
  protected:
 
   // Space discretisation
-  double x_dom;      // Spatial extent [0.0, x_dom]
-  size_t M;   // Number of spatial differencing points
+  Discretization const & disc;
 
-  // Time discretisation
+  // Time discretisation (better refactoring would require that this is part of the previous attribute "disc")
   double t_dom;      // Temporal extent [0.0, t_dom]
   size_t N;   // Number of temporal differencing points
 
   // Constructor
-  FDMBase(double _x_dom, size_t _M,
-          double _t_dom, size_t _N);
+  FDMBase(double _t_dom, size_t _N,
+          Discretization const & _disc) 
+          : t_dom(_t_dom), N(_N), disc(_disc) {}
 
  public:
   /**
@@ -48,13 +48,8 @@ class FDMBase {
    */
   virtual std::vector<double> step_march(std::string output_file) = 0;
 
-  // TODO : maybe make this a shared pointer for safety, or delete completely
-  virtual ConvectionDiffusionPDE const * get_pde() = 0;
 };
 
-
-// TODO : rather than take a pde as argument, take a european option and create a BS for it
-// TODO : remove most of methods
 
 class BSEuroImplicit : public FDMBase {
  protected:
@@ -62,50 +57,26 @@ class BSEuroImplicit : public FDMBase {
 
 // TODO : replace pointer to European option with reference
  public:
-  BSEuroImplicit(double _x_dom, size_t _M,
-                   double _t_dom, size_t _N,
-                   EuropeanOption * european_option);
-
-  ConvectionDiffusionPDE const * get_pde() { return pde; }
+  BSEuroImplicit(double _t_dom, size_t _N,
+                   EuropeanOption * european_option,
+          Discretization const & _disc)
+          : FDMBase(_t_dom, _N, _disc), pde(new BlackScholesPDE(european_option)) {}
 
   // return price
   std::vector<double> step_march(std::string output_file) override;
   ~BSEuroImplicit() { delete pde; }
 };
 
-/*
-struct AmericanOptionParameters {
-  BlackScholesPDE const * no_early_exercise_pde;
-
-};
-*/
-
-class BSAmericanImplicitUniform : public FDMBase {
-  BlackScholesPDE const * no_early_exercise_pde;
-
- public:
-  BSAmericanImplicitUniform(double _x_dom, size_t _M,
-                   double _t_dom, size_t _N,
-                   AmericanOption * american_option);
-  
-  ConvectionDiffusionPDE const * get_pde() { return no_early_exercise_pde; }
-
-  std::vector<double> step_march(std::string output_file) override;
-
-  ~BSAmericanImplicitUniform() { delete no_early_exercise_pde; }
-
-};
 
 class BSAmericanImplicit : public FDMBase {
   BlackScholesPDE const * no_early_exercise_pde;
 
  public:
-  BSAmericanImplicit(double _x_dom, size_t _M,
-                   double _t_dom, size_t _N,
-                   AmericanOption * american_option);
+  BSAmericanImplicit(double _t_dom, size_t _N,
+                   AmericanOption * american_option,
+          Discretization const & _disc)
+        : FDMBase(_t_dom, _N, _disc), no_early_exercise_pde(new BlackScholesPDE(american_option)) {}
   
-  ConvectionDiffusionPDE const * get_pde() { return no_early_exercise_pde; }
-
   std::vector<double> step_march(std::string output_file) override;
 
   ~BSAmericanImplicit() { delete no_early_exercise_pde; }
