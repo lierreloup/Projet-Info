@@ -40,6 +40,7 @@ std::vector<double> tridiagonal_product(std::vector<double> lower, std::vector<d
     catch(const std::exception& e)
     {
         std::cerr << e.what() << " in tridiagonal_product" << '\n';
+        throw e;
     }
 }
 
