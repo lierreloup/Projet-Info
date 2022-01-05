@@ -59,8 +59,6 @@ void closest(std::vector<double> x_values, double target, size_t & left_index, s
  */
 double interpolate(double x_target, double x0, double y0, double x1, double y1) {
     double res = y0 + (x_target - x0) * (y1 - y0) / (x1 - x0);
-    std::cout << "x " << x_target << " x0 " << x0 << " x1 "<<x1<<" y0 "<<y0<<" y1 "<<y1<<'\n';
-    std::cout << res << '\n';
     return res;
 }
 
@@ -93,12 +91,8 @@ double price_aux(double spot, FDMBase & solve_pde, std::string output_pde) {
 double price_european_call(price_inputs in, std::string output_pde) {
     // create option
     EuropeanCallOption option(in.strike, in.rate, in.volatility);
-    // determine discretization precision
-    double t_dom = in.time_to_maturity; //, x_dom = 4 * std::max(in.strike * exp(-rate * time_to_maturity), spot); // is usually enough for the boundary conditions to hold approximately
-
-    std::cout << " N in price " << in.N << '\n';
     // instantiate pde solver
-    BSEuroImplicit solve_pde(t_dom, in.N, &option, *in.disc);
+    BSEuroImplicit solve_pde(&option, *in.disc);
 
     //solve and interpolate
     return price_aux(in.spot, solve_pde, output_pde);
@@ -106,11 +100,9 @@ double price_european_call(price_inputs in, std::string output_pde) {
 
 double price_european_put(price_inputs in, std::string output_pde) {
     EuropeanPutOption option(in.strike, in.rate, in.volatility);
-    double t_dom = in.time_to_maturity; 
-
 
     // instantiate pde solver
-    BSEuroImplicit solve_pde(t_dom, in.N, &option, *in.disc);
+    BSEuroImplicit solve_pde(&option, *in.disc);
 
     return price_aux(in.spot, solve_pde, output_pde);
 }
@@ -119,10 +111,8 @@ double price_american_call(price_inputs in, std::string output_pde) {
     // create option
     AmericanCallOption option(in.strike, in.rate, in.volatility);
 
-    double t_dom = in.time_to_maturity;
-
     // solve pde and get the last line (which corresponds to prices for all spots and given time_to_maturity)
-    BSAmericanImplicit solve_pde(t_dom, in.N, &option, *in.disc);
+    BSAmericanImplicit solve_pde(&option, *in.disc);
 
     return price_aux(in.spot, solve_pde, output_pde);
 }
@@ -132,43 +122,91 @@ double price_american_put(price_inputs in, std::string output_pde) {
     // create option
     AmericanPutOption option(in.strike, in.rate, in.volatility);
 
-    double t_dom = in.time_to_maturity;
-
     // solve pde and get the last line (which corresponds to prices for all spots and given time_to_maturity)
-    BSAmericanImplicit solve_pde(t_dom, in.N, &option, *in.disc);
+    BSAmericanImplicit solve_pde(&option, *in.disc);
 
     return price_aux(in.spot, solve_pde, output_pde);
 }
 
 UniformDiscretization default_UniformDiscretization(price_inputs in) {
-    double x_dom = 3 * std::max(in.spot, exp(-in.rate * in.time_to_maturity));
-    size_t M = std::min(x_dom * 10, 1e3);
+    double x_dom = 2 * std::max(in.spot, in.strike * exp(-in.rate * in.time_to_maturity));
+    double N = std::min(in.time_to_maturity * 10., 1e3);
+    size_t M = std::min(x_dom * 100, 5e3);
 
-    UniformDiscretization disc(x_dom, M);
+    UniformDiscretization disc(x_dom, M, in.time_to_maturity, N);
     return disc;
 }
 
-NonUniformDiscretization default_NonUniformDiscretization(price_inputs in) {
-    double x_dom = 3 * std::max(in.spot, exp(-in.rate * in.time_to_maturity));
-    size_t M = std::min(static_cast<size_t>(x_dom * 10.), static_cast<size_t>(1e4));
 
-    double disc_center = in.strike
-        , c = in.strike / 3.
-    ;
 
-    NonUniformDiscretization disc(x_dom, M, disc_center, c);
-    return disc;
+bool between(double x, double a, double b) {
+    double y = std::min(a, b), z = std::max(a,b);
+
+    return y <= x && x <= z;
 }
 
-size_t default_N(price_inputs in) {
-    double result = std::min(in.time_to_maturity * 10., 1e3);
-    std::cout << " in default " << result << '\n';
-
-    return static_cast<size_t>(result);
+double find_zero_by_interpolation(double x0, double x1, double y0, double y1) {
+    double a = (y1 - y0) / (x1 - x0);
+    return x0 - y0 / a;
 }
 
 
+void get_exercise_boundaries_from_pde(price_inputs in, std::string pde_file, std::string exercise_output_file) {
+    std::fstream prices_stream(pde_file, std::ios::in);
+    std::ofstream put_out(exercise_output_file);
 
+    size_t M = in.disc->get_M() // nb of space steps
+    , N = in.disc->get_N(); // nb of time steps
+
+    std::vector<double> prices_n(M+1), prices_n_plus_1(M+1); // prices for the current and next time step
+    std::vector<double> theta(M+1); // the price deltas between current and next time step, for all spots
+    std::vector<double> exercise_boundaries(N, -1.); // Default value is -1 if no boundary is found
+    
+    // Init : store prices for all spots at time 0 in prices_n
+    double spot_m, time_to_maturity, price_m;           
+    for (size_t m = 0; m <= M; m++)
+    {
+        prices_stream >> spot_m >> time_to_maturity >> price_m;
+        prices_n.at(m) = price_m;
+    }
+
+    double spot_m_plus_1, price_m_plus_1;           
+    // Next : for each spot step, compute theta, and find spot which cancels theta
+    size_t n = 0;
+    while(prices_stream) {
+
+        // For spot = 0 : only compute theta
+        prices_stream >> spot_m >> time_to_maturity >> price_m;
+
+        theta.at(0) = price_m - prices_n.at(0); // compute dP / dt at given spot
+        prices_n_plus_1.at(0) = price_m;
+
+        // For spot > 0 : compute theta AND try to find exercise boundary
+        for (size_t m_plus_1 = 1; m_plus_1 <= M; m_plus_1++)
+        {
+            prices_stream >> spot_m_plus_1 >> time_to_maturity >> price_m_plus_1;
+
+            theta.at(m_plus_1) = price_m_plus_1 - prices_n.at(m_plus_1); // compute dP / dt at given spot
+
+            // try to find exercise boundary by interpolation
+            double m = m_plus_1 - 1;
+            if (between(0., theta.at(m), theta.at(m_plus_1))) {
+                exercise_boundaries.at(n) = find_zero_by_interpolation(spot_m, spot_m_plus_1, price_m, price_m_plus_1);
+                put_out << time_to_maturity << " " << exercise_boundaries.at(n) << '\n';
+            }
+
+            // Update space variables
+            spot_m = spot_m_plus_1, price_m = price_m_plus_1;
+        }
+        
+        // Update time variables
+        prices_n = prices_n_plus_1;
+        n++; // Next time step
+    }
+
+    put_out.close();
+    prices_stream.close();
+}
 
 
 

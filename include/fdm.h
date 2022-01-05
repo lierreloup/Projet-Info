@@ -20,17 +20,12 @@ struct NecessaryResults {
 class FDMBase {
  protected:
 
-  // Space discretisation
-  Discretization const & disc;
-
-  // Time discretisation (better refactoring would require that this is part of the previous attribute "disc")
-  double t_dom;      // Temporal extent [0.0, t_dom]
-  size_t N;   // Number of temporal differencing points
+  // Space and time discretisation
+  Discretization & disc;
 
   // Constructor
-  FDMBase(double _t_dom, size_t _N,
-          Discretization const & _disc) 
-          : t_dom(_t_dom), N(_N), disc(_disc) {}
+  FDMBase(Discretization & _disc) 
+  : disc(_disc) {}
 
  public:
   /**
@@ -40,42 +35,42 @@ class FDMBase {
   NecessaryResults results;
 
   /**
-   * @brief solve the pde
+   * @brief Solve the pde.
    * 
-   * @param output_file 
-   * @return std::vector<double> the function values for final time and all space values
-   * @
+   * @param output_file A file where prices for the whole grid are stored
+   * @return std::vector<double> the function values for final time and all space values (final line)
    */
   virtual std::vector<double> step_march(std::string output_file) = 0;
 
 };
 
 
+// IMPLEMENTATIONS FOR BLACK SCHOLES PRICING
+
 class BSEuroImplicit : public FDMBase {
  protected:
   BlackScholesPDE const * pde;
 
-// TODO : replace pointer to European option with reference
  public:
-  BSEuroImplicit(double _t_dom, size_t _N,
-                   EuropeanOption * european_option,
-          Discretization const & _disc)
-          : FDMBase(_t_dom, _N, _disc), pde(new BlackScholesPDE(european_option)) {}
+  BSEuroImplicit(EuropeanOption * european_option, UniformDiscretization & _disc)
+  : FDMBase(_disc), pde(new BlackScholesPDE(european_option)) {}
 
   // return price
   std::vector<double> step_march(std::string output_file) override;
+
   ~BSEuroImplicit() { delete pde; }
 };
 
 
+
+
+
 class BSAmericanImplicit : public FDMBase {
-  BlackScholesPDE const * no_early_exercise_pde;
+  BlackScholesPDE const * no_early_exercise_pde; // PDE in the no exercise region (see the Horng-Tien reference)
 
  public:
-  BSAmericanImplicit(double _t_dom, size_t _N,
-                   AmericanOption * american_option,
-          Discretization const & _disc)
-        : FDMBase(_t_dom, _N, _disc), no_early_exercise_pde(new BlackScholesPDE(american_option)) {}
+  BSAmericanImplicit(AmericanOption * american_option, UniformDiscretization & _disc)
+  : FDMBase(_disc), no_early_exercise_pde(new BlackScholesPDE(american_option)) {}
   
   std::vector<double> step_march(std::string output_file) override;
 

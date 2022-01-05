@@ -9,11 +9,6 @@
 
 int main(int argc, char **argv) {
 
-  //try
-  //{
-    std::cout << "ok\n";
-  /*
-  
   //argv[1] is the name of a file which contains arguments
   Input input = get_params_from_file(argv[1]);
   
@@ -23,26 +18,17 @@ int main(int argc, char **argv) {
  
   //Price_graph(input.spot, input.time_to_maturity, input.strike, input.rate, input.volatility, "european_call.csv", "european_call");
   
+  price_inputs in;
+  in.spot = input.spot, in.time_to_maturity = input.time_to_maturity, in.strike = input.strike, in.rate = input.rate, in.volatility = input.volatility;
+  UniformDiscretization disc = default_UniformDiscretization(in);
+  in.disc = &disc;
+
+  double price = price_european_call(in);
   
-  double price = price_european_call(
-    input.strike
-    , input.time_to_maturity
-    , input.strike
-    , input.rate
-    , input.volatility
-    , "isokornot"
-  );
   Output output;
   output.price = price;
   output.delta = 0xbadc0de;
   create_output_file("out_eu_call", output);
-  
-  }
-  catch(const std::exception& e)
-  {
-    std::cerr << e.what() << '\n';
-  }
-  return 0;
-  */
+
   return 0;
 }

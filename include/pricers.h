@@ -12,67 +12,47 @@ struct price_inputs {
         , volatility
     ;
 
-    Discretization * disc; // here we use a pointer so we don't have to make a constructor for price_inputs (wouldn't work for a reference)
-    size_t N;
+    UniformDiscretization * disc; // here we use a pointer so we don't have to make a constructor for price_inputs (wouldn't work for a reference)
 };
 
 /**
  * @brief get price for european call
- * 
- * @param spot 
- * @param time_to_maturity 
- * @param strike 
- * @param rate 
- * @param volatility 
- * @param output_pde 
- * @return double 
  */
 double price_european_call(price_inputs in, std::string output_pde = "european_call.csv");
 
 /**
  * @brief get price for european put
- * 
- * @param spot 
- * @param time_to_maturity 
- * @param strike 
- * @param rate 
- * @param volatility 
- * @param output_pde 
- * @return double 
  */
 double price_european_put(price_inputs in, std::string output_pde = "european_put.csv");
 
 /**
  * @brief get price for american call
- * 
- * @param spot 
- * @param time_to_maturity 
- * @param strike 
- * @param rate 
- * @param volatility 
- * @param output_pde 
- * @return double 
  */
 double price_american_call(price_inputs in, std::string output_pde = "american_call.csv");
 
 /**
  * @brief get price for american put
- * 
- * @param spot 
- * @param time_to_maturity 
- * @param strike 
- * @param rate 
- * @param volatility 
- * @param output_pde 
- * @return double 
  */
 double price_american_put(price_inputs in, std::string output_pde = "american_put.csv");
 
+/**
+ * @brief set in.disc to a default discretization scheme
+ * 
+ * @param in the input struct to pricing functions
+ * @return UniformDiscretization an discretization for pde solving
+ */
 UniformDiscretization default_UniformDiscretization(price_inputs in);
 
-NonUniformDiscretization default_NonUniformDiscretization(price_inputs in);
+/**
+ * @brief Get the exercise boundary from the grid prices of an american option (Horng Tien part IV)
+ * 
+ * @param in the pricing parameters
+ * @param pde_output_file the file where the finite differences for the pde (with given parameters) were stored
+ * @param exercise_output_file the file where we wish to store the exercise boundaries
+ * @attention if an exercise boundary could not be found, it is set to -1
+ */
+void get_exercise_boundaries_from_pde(price_inputs in, std::string pde_file, std::string exercise_output_file);
 
-size_t default_N(price_inputs in);
 
 // "BONUS" functions
 

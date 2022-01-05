@@ -27,33 +27,40 @@ double delta_option(double spot, double time_to_maturity, double strike, double 
 
     // precision
   double h = spot/10000;
-  
+  price_inputs in;
+  in.spot = spot, in.time_to_maturity = time_to_maturity, in.strike = strike, in.rate = rate, in.volatility = volatility;
+  UniformDiscretization disc = default_UniformDiscretization(in);
+  in.disc = &disc;
+
     // determine derivative
   if (strcmp(type_of_option,"european_call")==0){
-    double Price_S1 = price_european_call(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_european_call(spot+h,time_to_maturity, strike, rate, volatility, output_pde);
+    double Price_S1 = price_european_call(in, output_pde);
+    in.spot += h;
+    double Price_S2 = price_european_call(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
 
 
   if (strcmp(type_of_option,"european_put")==0){
-    double Price_S1 = price_european_put(spot,time_to_maturity, strike, rate, volatility, output_pde);
+    double Price_S1 = price_european_put(in, output_pde);
 
-    
-    double Price_S2 = price_european_put(spot+h,time_to_maturity, strike, rate, volatility, output_pde);
+    in.spot+=h;
+    double Price_S2 = price_european_put(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
 
   
   if (strcmp(type_of_option,"american_call")==0){
-    double Price_S1 = price_american_call(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_american_call(spot+h,time_to_maturity, strike, rate, volatility, output_pde);
+    double Price_S1 = price_american_call(in, output_pde);
+    in.spot += h;
+    double Price_S2 = price_american_call(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
   
   if (strcmp(type_of_option,"american_put")==0){
-    double Price_S1 = price_american_put(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_american_put(spot+h,time_to_maturity, strike, rate, volatility, output_pde);
+    double Price_S1 = price_american_put(in, output_pde);
+    in.spot += h;
+    double Price_S2 = price_american_put(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
 
@@ -78,35 +85,43 @@ double gamma_option(double spot, double time_to_maturity, double strike, double 
 
 double theta_option(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde, const char* type_of_option) {
 
-    // precision
+  // precision
   double h = time_to_maturity/10000;
-  
-    // determine derivative
+
+  price_inputs in;
+  in.spot = spot, in.time_to_maturity = time_to_maturity, in.strike = strike, in.rate = rate, in.volatility = volatility;
+  UniformDiscretization disc = default_UniformDiscretization(in);
+  in.disc = &disc;
+
+  // determine derivative
   if (strcmp(type_of_option,"european_call")==0){
-    double Price_S1 = price_european_call(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_european_call(spot,time_to_maturity+h, strike, rate, volatility, output_pde);
+    double Price_S1 = price_european_call(in, output_pde);
+    in.time_to_maturity += h;
+    double Price_S2 = price_european_call(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
 
 
   if (strcmp(type_of_option,"european_put")==0){
-    double Price_S1 = price_european_put(spot,time_to_maturity, strike, rate, volatility, output_pde);
+    double Price_S1 = price_european_put(in, output_pde);
 
-    
-    double Price_S2 = price_european_put(spot,time_to_maturity+h, strike, rate, volatility, output_pde);
+    in.time_to_maturity += h;
+    double Price_S2 = price_european_put(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
 
   
   if (strcmp(type_of_option,"american_call")==0){
-    double Price_S1 = price_american_call(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_american_call(spot,time_to_maturity+h, strike, rate, volatility, output_pde);
+    double Price_S1 = price_american_call(in, output_pde);
+    in.time_to_maturity += h;
+    double Price_S2 = price_american_call(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
   
   if (strcmp(type_of_option,"american_put")==0){
-    double Price_S1 = price_american_put(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_american_put(spot,time_to_maturity+h, strike, rate, volatility, output_pde);
+    double Price_S1 = price_american_put(in, output_pde);
+    in.time_to_maturity += h;
+    double Price_S2 = price_american_put(in, output_pde);
     return((Price_S2-Price_S1)/h);
   };
   return 0.0;
@@ -118,33 +133,41 @@ double rho_option(double spot, double time_to_maturity, double strike, double ra
 
     // precision
   double h = rate/10000;
-  
+    price_inputs in;
+  in.spot = spot, in.time_to_maturity = time_to_maturity, in.strike = strike, in.rate = rate, in.volatility = volatility;
+  UniformDiscretization disc = default_UniformDiscretization(in);
+  in.disc = &disc;
     // determine derivative
   if (strcmp(type_of_option,"european_call")==0){
-    double Price_S1 = price_european_call(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_european_call(spot,time_to_maturity, strike, rate+h, volatility, output_pde);
+    double Price_S1 = price_european_call(in, output_pde);
+    in.rate += h;
+    double Price_S2 = price_european_call(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
 
 
   if (strcmp(type_of_option,"european_put")==0){
-    double Price_S1 = price_european_put(spot,time_to_maturity, strike, rate, volatility, output_pde);
+    double Price_S1 = price_european_put(in, output_pde);
 
-    
-    double Price_S2 = price_european_put(spot,time_to_maturity, strike, rate+h, volatility, output_pde);
+    in.rate += h;
+    double Price_S2 = price_european_put(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
 
   
   if (strcmp(type_of_option,"american_call")==0){
-    double Price_S1 = price_american_call(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_american_call(spot,time_to_maturity, strike, rate+h, volatility, output_pde);
+    double Price_S1 = price_american_call(in, output_pde);
+
+    in.rate += h;
+    double Price_S2 = price_american_call(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
   
   if (strcmp(type_of_option,"american_put")==0){
-    double Price_S1 = price_american_put(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_american_put(spot,time_to_maturity, strike, rate+h, volatility, output_pde);
+    double Price_S1 = price_american_put(in, output_pde);
+
+    in.rate += h;
+    double Price_S2 = price_american_put(in, output_pde);
     return((Price_S2-Price_S1)/h);
   };
   return 0.0;
@@ -156,33 +179,38 @@ double vega_option(double spot, double time_to_maturity, double strike, double r
 
     // precision
   double h = volatility/10000;
-  
+    price_inputs in;
+  in.spot = spot, in.time_to_maturity = time_to_maturity, in.strike = strike, in.rate = rate, in.volatility = volatility;
+  UniformDiscretization disc = default_UniformDiscretization(in);
+  in.disc = &disc;
     // determine derivative
   if (strcmp(type_of_option,"european_call")==0){
-    double Price_S1 = price_european_call(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_european_call(spot,time_to_maturity, strike, rate, volatility+h, output_pde);
+    double Price_S1 = price_european_call(in, output_pde);
+    in.volatility += h;
+    double Price_S2 = price_european_call(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
 
 
   if (strcmp(type_of_option,"european_put")==0){
-    double Price_S1 = price_european_put(spot,time_to_maturity, strike, rate, volatility, output_pde);
-
-    
-    double Price_S2 = price_european_put(spot,time_to_maturity, strike, rate, volatility+h, output_pde);
+    double Price_S1 = price_european_put(in, output_pde);
+    in.volatility += h;    
+    double Price_S2 = price_european_put(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
 
   
   if (strcmp(type_of_option,"american_call")==0){
-    double Price_S1 = price_american_call(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_american_call(spot,time_to_maturity, strike, rate, volatility+h, output_pde);
+    double Price_S1 = price_american_call(in, output_pde);
+    in.volatility += h;
+    double Price_S2 = price_american_call(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
   
   if (strcmp(type_of_option,"american_put")==0){
-    double Price_S1 = price_american_put(spot,time_to_maturity, strike, rate, volatility, output_pde);
-    double Price_S2 = price_american_put(spot,time_to_maturity, strike, rate, volatility+h, output_pde);
+    double Price_S1 = price_american_put(in, output_pde);
+    in.volatility += h;
+    double Price_S2 = price_american_put(in, output_pde);
     return((Price_S2-Price_S1)/h);
   };
   return 0.0;

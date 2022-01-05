@@ -15,7 +15,8 @@ struct prices_test {
     volatility,
     time_to_maturity,
     price,
-    theoretical_price
+    theoretical_price,
+    tol
     ;
 };
 
@@ -40,6 +41,7 @@ prices_test generate_pricing_test(std::string option_type, double upper_bound) {
     tst.rate = random_float(upper_bound) / 100,
     tst.volatility = (random_float(upper_bound) + upper_bound / 2) / 100,
     tst.time_to_maturity = random_float(upper_bound)  + upper_bound / 2;
+    tst.tol = std::max(0.1, exp(- tst.rate * tst.time_to_maturity) ); // the error gets big for negative rates and long time to maturity
 
     //print_prices_test(tst);
 
@@ -49,8 +51,7 @@ prices_test generate_pricing_test(std::string option_type, double upper_bound) {
     in.rate = tst.rate;
     in.volatility = tst.volatility;
     in.time_to_maturity = tst.time_to_maturity;
-    in.N = default_N(in);
-    NonUniformDiscretization disc = default_NonUniformDiscretization(in);
+    UniformDiscretization disc = default_UniformDiscretization(in);
     in.disc = &disc;
 
     //print_vector(disc.get_grid());
@@ -86,7 +87,7 @@ prices_test generate_pricing_test(std::string option_type, double upper_bound) {
 
 Test(fdm, european_prices) {
     double upper_bound = 100;
-    double tol = 0.01;
+    //double tol = 0.01;
     size_t count = 10;
 
     for (size_t i = 0; i < count; i++)
@@ -94,12 +95,12 @@ Test(fdm, european_prices) {
         prices_test tst_call = generate_pricing_test("call", upper_bound);
         std::cout << "call \n";
         print_prices_test(tst_call);
-        cr_assert(abs(tst_call.price - tst_call.theoretical_price) < tol);
+        cr_assert(abs(tst_call.price - tst_call.theoretical_price) < tst_call.tol);
 
 
         prices_test tst_put = generate_pricing_test("put", upper_bound);
         std::cout << "put \n";
         print_prices_test(tst_put);
-        cr_assert(abs(tst_put.price - tst_put.theoretical_price) < tol);
+        cr_assert(abs(tst_put.price - tst_put.theoretical_price) < tst_put.tol);
     }
 }

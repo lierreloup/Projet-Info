@@ -18,47 +18,18 @@ std::vector<double> get_uniform_x_grid(size_t M, double dx) {
   return x_values;
 }
 
-std::vector<double> UniformDiscretization::get_grid() const {
+std::vector<double> UniformDiscretization::get_x_grid() const {
     return get_uniform_x_grid(
       this->M
       , this->x_dom / this->M
     );
 }
 
-// NON UNIFORM DISCRETIZATION
-
-double compute_delta_eta(double M, double x_dom, double K, double c) {
-  return (
-    asinh((x_dom - K) / c) - asinh(-K / c)
-  ) / (
-    M
-  );
-}
-
-double compute_eta(double i, double K, double c, double delta_eta) {
-  return asinh(-K / c) + i * delta_eta;
-}
-
-std::vector<double> get_non_uniform_grid(size_t M, double x_dom, double K, double c) {
-  //std::cout << "M " << M << " x_dom " << x_dom << " K " << K << " c " << c << '\n';
-  std::vector<double> x_values(M+1);
-  double delta_eta = compute_delta_eta(static_cast<double>(M), x_dom, K, c);
-
-  for (size_t i = 0; i <= M; i++) {
-    double eta_i = compute_eta(static_cast<double> (i), K, c, delta_eta);
-    x_values.at(i) = K + c * sinh(eta_i);
-  }
-
-  return x_values;
-}
-
-std::vector<double> NonUniformDiscretization::get_grid() const {
-  return get_non_uniform_grid(
-    this->M
-    , this->x_dom
-    , this->disc_center
-    , this->c
-  );
+std::vector<double> UniformDiscretization::get_t_grid() const {
+    return get_uniform_x_grid(
+      this->N
+      , this->t_dom / this->N
+    );
 }
 
 #endif

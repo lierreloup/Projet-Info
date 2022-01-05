@@ -287,13 +287,5 @@ Test(fdm, increment_european) {
             all_abs_dist_under_tol(tst.new_result, tst.new_result_theoretical, tol, max_index)
         );
     }
-    
-    
-    /*
-    print_increment_test(tst);
-    print_vector(tst.old_result);
-    print_vector(tst.new_result);
-    print_vector(tst.new_result_theoretical);
-    */
 
 }
