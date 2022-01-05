@@ -2,6 +2,7 @@
 #define __DISCRETIZATION_H
 
 #include <vector>
+#include <stddef.h>
 
 // Function to get a uniform grid
 std::vector<double> get_uniform_x_grid(size_t M, double dx);
@@ -18,8 +19,8 @@ class Discretization {
     double t_dom; // Temporal extent [0.0, t_dom]
     size_t N; // Number of temporal differencing points
 
-    Discretization(double _x_dom, size_t _M, double _t_dom, size_t _N)
-    : x_dom(_x_dom), M(_M), t_dom(_t_dom), N(_N) {}
+    Discretization(double _x_dom, size_t _M, double _t_dom, size_t N_)
+    : x_dom(_x_dom), M(_M), t_dom(_t_dom), N(N_) {}
 
     public :
     virtual std::vector<double> get_x_grid() const = 0;
@@ -37,8 +38,8 @@ class Discretization {
  */
 class UniformDiscretization : public Discretization {
     public :
-    UniformDiscretization(double _x_dom, size_t _M, double _t_dom, size_t _N)
-    : Discretization(_x_dom, _M, _t_dom, _N) {} 
+    UniformDiscretization(double _x_dom, size_t _M, double _t_dom, size_t N_)
+    : Discretization(_x_dom, _M, _t_dom, N_) {} 
 
     std::vector<double> get_x_grid() const  override;
     std::vector<double> get_t_grid() const  override;

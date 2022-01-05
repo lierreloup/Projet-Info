@@ -4,6 +4,7 @@
 #include "../include/discretization.h"
 #include <math.h>
 #include <iostream>
+#include <stddef.h>
 
 // UNIFORM DISCRETIZATION
 
