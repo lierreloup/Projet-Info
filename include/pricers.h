@@ -4,6 +4,7 @@
 #include <string>
 #include "discretization.h"
 
+
 struct price_inputs {
     double spot
         , time_to_maturity
@@ -41,7 +42,7 @@ double price_american_put(price_inputs in, std::string output_pde = "american_pu
  * @param in the input struct to pricing functions
  * @return UniformDiscretization an discretization for pde solving
  */
-UniformDiscretization default_UniformDiscretization(price_inputs in);
+UniformDiscretization default_UniformDiscretization(price_inputs in,size_t M, size_t N);
 
 /**
  * @brief Get the exercise boundary from the grid prices of an american option (Horng Tien part IV)

@@ -19,6 +19,8 @@ class Discretization {
     double t_dom; // Temporal extent [0.0, t_dom]
     size_t N; // Number of temporal differencing points
 
+    virtual ~Discretization();
+
     Discretization(double _x_dom, size_t _M, double _t_dom, size_t N_)
     : x_dom(_x_dom), M(_M), t_dom(_t_dom), N(N_) {}
 

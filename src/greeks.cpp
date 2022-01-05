@@ -3,6 +3,9 @@
 
 #include "../include/greeks.h"
 #include "../include/pricers.h"
+#include "../include/pde.h"
+#include "../include/discretization.h"
+#include "../include/vba_interface.h"
 #include <math.h>
 #include <fstream>
 #include <string>
@@ -22,16 +25,11 @@
  *
  */
 
-
-double delta_option(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde, const char* type_of_option) {
+double delta_option(price_inputs in, std::string output_pde,const char *type_of_option) {
 
     // precision
-  double h = spot/10000;
-  price_inputs in;
-  in.spot = spot, in.time_to_maturity = time_to_maturity, in.strike = strike, in.rate = rate, in.volatility = volatility;
-  UniformDiscretization disc = default_UniformDiscretization(in);
-  in.disc = &disc;
-
+  double h = in.spot/10000;
+  
     // determine derivative
   if (strcmp(type_of_option,"european_call")==0){
     double Price_S1 = price_european_call(in, output_pde);
@@ -69,29 +67,26 @@ double delta_option(double spot, double time_to_maturity, double strike, double 
 }
 
 
-double gamma_option(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde, const char* type_of_option) {
+double gamma_option(price_inputs in, std::string output_pde,const char *type_of_option) {
 
     // precision
-  double h = spot/100000;
+  double h = in.spot/1000;
   
     // determine derivative
-  double delta_d1 = delta_option(spot, time_to_maturity, strike, rate, volatility, output_pde, type_of_option);
+  double delta_d1 = delta_option(in, output_pde, type_of_option);
 
-  double delta_d2 = delta_option(spot+h, time_to_maturity, strike, rate, volatility, output_pde, type_of_option);
+  in.spot += h;
+
+  double delta_d2 = delta_option(in, output_pde, type_of_option);
 
   return((delta_d1-delta_d2)/h);
 
 };
 
-double theta_option(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde, const char* type_of_option) {
+double theta_option(price_inputs in, std::string output_pde,const char *type_of_option) {
 
   // precision
-  double h = time_to_maturity/10000;
-
-  price_inputs in;
-  in.spot = spot, in.time_to_maturity = time_to_maturity, in.strike = strike, in.rate = rate, in.volatility = volatility;
-  UniformDiscretization disc = default_UniformDiscretization(in);
-  in.disc = &disc;
+  double h = in.time_to_maturity/100;
 
   // determine derivative
   if (strcmp(type_of_option,"european_call")==0){
@@ -117,7 +112,8 @@ double theta_option(double spot, double time_to_maturity, double strike, double 
     double Price_S2 = price_american_call(in, output_pde);
     return((Price_S2-Price_S1)/h);
       };
-  
+
+
   if (strcmp(type_of_option,"american_put")==0){
     double Price_S1 = price_american_put(in, output_pde);
     in.time_to_maturity += h;
@@ -129,14 +125,11 @@ double theta_option(double spot, double time_to_maturity, double strike, double 
 
 
 
-double rho_option(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde, const char* type_of_option) {
+double rho_option(price_inputs in, std::string output_pde,const char *type_of_option) {
 
     // precision
-  double h = rate/10000;
-    price_inputs in;
-  in.spot = spot, in.time_to_maturity = time_to_maturity, in.strike = strike, in.rate = rate, in.volatility = volatility;
-  UniformDiscretization disc = default_UniformDiscretization(in);
-  in.disc = &disc;
+  double h = in.rate/100;
+    
     // determine derivative
   if (strcmp(type_of_option,"european_call")==0){
     double Price_S1 = price_european_call(in, output_pde);
@@ -175,14 +168,11 @@ double rho_option(double spot, double time_to_maturity, double strike, double ra
 
 
 
-double vega_option(double spot, double time_to_maturity, double strike, double rate, double volatility, std::string output_pde, const char* type_of_option) {
+double vega_option(price_inputs in, std::string output_pde, const char *type_of_option) {
 
     // precision
-  double h = volatility/10000;
-    price_inputs in;
-  in.spot = spot, in.time_to_maturity = time_to_maturity, in.strike = strike, in.rate = rate, in.volatility = volatility;
-  UniformDiscretization disc = default_UniformDiscretization(in);
-  in.disc = &disc;
+  double h = in.volatility/100;
+    
     // determine derivative
   if (strcmp(type_of_option,"european_call")==0){
     double Price_S1 = price_european_call(in, output_pde);
@@ -215,4 +205,5 @@ double vega_option(double spot, double time_to_maturity, double strike, double r
   };
   return 0.0;
 }
+
 #endif

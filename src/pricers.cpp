@@ -128,15 +128,12 @@ double price_american_put(price_inputs in, std::string output_pde) {
     return price_aux(in.spot, solve_pde, output_pde);
 }
 
-UniformDiscretization default_UniformDiscretization(price_inputs in) {
+UniformDiscretization default_UniformDiscretization(price_inputs in, size_t M, size_t N) {
     double x_dom = 2 * std::max(in.spot, in.strike * exp(-in.rate * in.time_to_maturity));
-    double N = std::min(in.time_to_maturity * 10., 1e3);
-    size_t M = std::min(x_dom * 100, 5e3);
 
     UniformDiscretization disc(x_dom, M, in.time_to_maturity, N);
     return disc;
 }
-
 
 
 bool between(double x, double a, double b) {

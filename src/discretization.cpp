@@ -8,6 +8,8 @@
 
 // UNIFORM DISCRETIZATION
 
+Discretization::~Discretization(){}
+
 std::vector<double> get_uniform_x_grid(size_t M, double dx) {
   std::vector<double> x_values(M+1);
 
