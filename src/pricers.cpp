@@ -189,7 +189,7 @@ void get_exercise_boundaries_from_pde(price_inputs in, std::string pde_file, std
             double m = m_plus_1 - 1;
             if (between(0., theta.at(m), theta.at(m_plus_1))) {
                 exercise_boundaries.at(n) = find_zero_by_interpolation(spot_m, spot_m_plus_1, price_m, price_m_plus_1);
-                put_out << time_to_maturity << " " << exercise_boundaries.at(n) << '\n';
+                put_out << exercise_boundaries.at(n)  << "," << time_to_maturity  << '\n';
             }
 
             // Update space variables

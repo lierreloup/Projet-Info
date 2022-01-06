@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   double price = price_option(input);
 
   const char* type_of_option = input.option_type.c_str();
-
+//
   std::remove("../output");
   std::remove("../output.csv");
   Output output;
@@ -34,6 +34,12 @@ int main(int argc, char **argv) {
 
 Price_graph(input, input.option_type, type_of_option);
   delta_graph(input,  input.option_type,  type_of_option);
+
+      price_inputs in;
+    in.spot = input.spot, in.time_to_maturity = input.time_to_maturity, in.strike = input.strike, in.rate = input.rate, in.volatility = input.volatility;
+    UniformDiscretization disc = default_UniformDiscretization(in, input.M, input.N);
+    in.disc = &disc;
+  get_exercise_boundaries_from_pde(in, input.option_type, "exercise.csv");
 
   return 0;
 }

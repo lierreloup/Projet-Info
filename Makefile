@@ -1,5 +1,5 @@
 CC = g++
-CCO = $(CC) -c
+CCO = $(CC) -c -lstdc++
 
 all : bin/price.exe
 
