@@ -23,11 +23,17 @@ int main(int argc, char **argv) {
 
   double price = price_option(input);
 
+  const char* type_of_option = input.option_type.c_str();
+
+  std::remove("../output");
+  std::remove("../output.csv");
   Output output;
   output.price = price;
   store_greeks( output, input);
-
   create_output_file(argv[2], output);
+
+Price_graph(input, input.option_type, type_of_option);
+  delta_graph(input,  input.option_type,  type_of_option);
 
   return 0;
 }

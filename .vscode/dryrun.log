@@ -1,0 +1,21 @@
+make.exe --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/c/Users/UTILISATEUR/projects/Projet-Info'
+g++ -c src/pde.cpp -o obj/pde.o
+ 
+g++ -c src/option.cpp -o obj/option.o
+ 
+g++ -c src/discretization.cpp -o obj/discretization.o
+ 
+g++ -c src/fdm.cpp -o obj/fdm.o
+ 
+g++ -c src/pricers.cpp -o obj/pricers.o
+ 
+g++ -c src/greeks.cpp -o obj/greeks.o
+ 
+g++ -c src/graph_builder.cpp -o obj/graph_builder.o
+ 
+g++ -c src/vba_interface.cpp -o obj/vba_interface.o
+ 
+g++ obj/pde.o obj/option.o obj/discretization.o obj/fdm.o obj/pricers.o obj/greeks.o obj/graph_builder.o obj/vba_interface.o src/main.cpp -o bin/price.exe
+make: Leaving directory '/c/Users/UTILISATEUR/projects/Projet-Info'
+ 

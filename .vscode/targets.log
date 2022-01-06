@@ -1,0 +1,528 @@
+make.exe all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 4.3
+# Built for x86_64-pc-msys
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+ 
+
+ 
+# Make data base, printed on Thu Jan  6 09:39:10 2022
+ 
+
+# Variables
+
+ 
+# environment
+FPS_BROWSER_APP_PROFILE_STRING = Internet Explorer
+# environment
+SYSTEMDRIVE = C:
+# environment
+LC_ALL = C
+# environment
+OCAMLLIB = C:\Users\UTILISATEUR\caml\OCaml\lib
+# environment
+USERPROFILE = C:\Users\UTILISATEUR
+# environment
+LOCALAPPDATA = C:\Users\UTILISATEUR\AppData\Local
+# environment
+VSCODE_IPC_HOOK_EXTHOST = \\.\pipe\vscode-ipc-0e707edb-435a-468b-86a9-1feb1f77b57d-sock
+# environment
+VSCODE_CWD = D:\Microsoft VS Code
+# environment
+SYSTEMROOT = C:\WINDOWS
+# environment
+PROCESSOR_LEVEL = 6
+# environment
+PSMODULEPATH = C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+CHROME_CRASHPAD_PIPE_NAME = \\.\pipe\crashpad_9144_JQXONQBYRTUYVYQV
+# makefile (from 'Makefile', line 2)
+CCO = $(CC) -c
+# environment
+FPS_BROWSER_USER_PROFILE_STRING = Default
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+VSCODE_LOG_STACK = false
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = C:\Users\UTILISATEUR\AppData\Roaming\Code\CachedData\899d46d82c4c95423fb7e10e68eba52050e30ba3
+# environment
+LANG = C
+# default
+.LOADED := 
+# environment
+TMP = /c/Users/UTILIS~1/AppData/Local/Temp
+# default
+.INCLUDE_DIRS = /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrR
+# environment
+ONEDRIVE = C:\Users\UTILISATEUR\OneDrive
+ 
+# makefile
+CURDIR := /c/Users/UTILISATEUR/projects/Projet-Info
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+PROGRAMFILES = C:\Program Files
+# environment
+MFLAGS = -pqrR
+# default
+.SHELLFLAGS := -c
+# environment
+!C: = c:\Users\UTILISATEUR\projects\Projet-Info
+# environment
+COMMONPROGRAMW6432 = C:\Program Files\Common Files
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+VSCODE_PID = 9144
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# automatic
+*F = $(notdir $*)
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"locale":"fr","availableLanguages":{},"_languagePackSupport":true}
+# default
+MAKE_HOST := x86_64-pc-msys
+# environment
+PROGRAMDATA = C:\ProgramData
+# default
+SHELL := /bin/sh
+# environment
+HOMEPATH = \Users\UTILISATEUR
+# default
+MAKECMDGOALS := all
+# environment
+DRIVERDATA = C:\Windows\System32\Drivers\DriverData
+# environment
+COMSPEC = C:\WINDOWS\system32\cmd.exe
+# environment
+WINDIR = C:\WINDOWS
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /mingw64/bin:/usr/bin:/c/Users/UTILISATEUR/caml/OCaml/bin:/c/OCaml/bin:/d/Users/UTILISATEUR/Documents/OCaml/bin:/c/WINDOWS/system32:/c/WINDOWS:/c/WINDOWS/System32/Wbem:/c/WINDOWS/System32/WindowsPowerShell/v1.0:/c/WINDOWS/System32/OpenSSH:/c/Program Files/Microsoft SQL Server/130/Tools/Binn:/c/Program Files/Git/cmd:/c/Program Files/MySQL/MySQL Shell 8.0/bin:/c/Users/UTILISATEUR/scoop/shims:/c/Users/UTILISATEUR/AppData/Roaming/TinyTeX/bin/win32:/c/Users/UTILISATEUR/AppData/Local/Microsoft/WindowsApps:/c/Users/UTILISATEUR/AppData/Local/Programs/MiKTeX 2.9/miktex/bin/x64:/c/ffmpeg/bin:/d/Microsoft VS Code/bin:/d/msys64/mingw64/bin:/d/bin
+# environment
+COMPUTERNAME = DESKTOP-CCM94QD
+# default
+MAKEFILES := 
+# automatic
+ 
+^F = $(notdir $^)
+ 
+# environment
+ 
+PROMPT = $P$G
+ 
+# environment
+ 
+LOGONSERVER = \\DESKTOP-CCM94QD
+# environment
+VSCODE_LOG_NATIVE = false
+# environment
+USERNAME = UTILISATEUR
+# environment
+COMMONPROGRAMFILES = C:\Program Files\Common Files
+# automatic
+?F = $(notdir $?)
+# environment
+PROGRAMW6432 = C:\Program Files
+# environment
+PATHEXT = .COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.PY
+# automatic
++F = $(notdir $+)
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = undefined
+# environment
+USERDOMAIN = DESKTOP-CCM94QD
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+OS = Windows_NT
+# makefile
+.DEFAULT_GOAL := all
+# default
+MAKE_VERSION := 4.3
+# environment
+PROGRAMFILES(X86) = C:\Program Files (x86)
+# environment
+USERDOMAIN_ROAMINGPROFILE = DESKTOP-CCM94QD
+# environment
+NUMBER_OF_PROCESSORS = 4
+# environment
+PUBLIC = C:\Users\Public
+# environment
+ASL.LOG = Destination=file
+# environment
+APPDATA = C:\Users\UTILISATEUR\AppData\Roaming
+# environment
+HOMEDRIVE = C:
+# environment
+PROCESSOR_ARCHITECTURE = AMD64
+# environment
+ 
+VSCODE_AMD_ENTRYPOINT = vs/workbench/services/extensions/node/extensionHostProcess
+# environment
+HOME = /home/UTILISATEUR
+# environment
+COMMONPROGRAMFILES(X86) = C:\Program Files (x86)\Common Files
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+TEMP = /c/Users/UTILIS~1/AppData/Local/Temp
+# environment
+VSCODE_IPC_HOOK = \\.\pipe\5c2be9a8f710d12d7bb51d9639034fc4-1.63.2-main-sock
+# environment
+TERM = xterm-256color
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# environment
+VS150COMCOMNTOOLS = C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\
+# default
+SUFFIXES := 
+# environment
+ALLUSERSPROFILE = C:\ProgramData
+# environment
+SESSIONNAME = Console
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# environment
+PROCESSOR_REVISION = 8e09
+# makefile (from 'Makefile', line 1)
+CC = g++
+# environment
+PROCESSOR_IDENTIFIER = Intel64 Family 6 Model 142 Stepping 9, GenuineIntel
+# variable set hash-table stats:
+# Load=101/1024=10%, Rehash=0, Collisions=12/128=9%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 3191292253, inode 63050394783288845): 25 files, no impossibilities.
+
+# 25 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+bin/price.exe: obj/pde.o obj/option.o obj/discretization.o obj/fdm.o obj/pricers.o obj/greeks.o obj/graph_builder.o obj/vba_interface.o src/main.cpp
+#  Implicit rule search has not been done.
+#  Last modified 2022-01-06 01:12:21.9320011
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 31):
+	$(CC) $^ -o bin/price.exe
+
+# Not a target:
+include/graph_builder.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-06 00:31:58.4498084
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+src/discretization.cpp:
+ 
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 15:29:32.032388
+ 
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+ 
+src/fdm.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 14:01:12.9701904
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+include/discretization.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 15:28:18.9714952
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-06 01:13:27.9489809
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+ 
+src/vba_interface.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 23:35:26.5821035
+#  File has been updated.
+#  Successfully updated.
+
+obj/pricers.o: src/pricers.cpp include/pricers.h
+#  Implicit rule search has not been done.
+#  Last modified 2022-01-06 00:48:56.6448133
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 19):
+	$(CCO) $< -o $@
+
+obj/option.o: src/option.cpp include/option.h
+#  Implicit rule search has not been done.
+#  Last modified 2022-01-06 00:48:53.6181729
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 13):
+	$(CCO) $< -o $@
+
+# Not a target:
+src/main.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-06 01:08:13.6362943
+#  File has been updated.
+#  Successfully updated.
+
+obj/vba_interface.o: src/vba_interface.cpp include/vba_interface.h
+#  Implicit rule search has not been done.
+ 
+#  Last modified 2022-01-06 00:48:59.1774214
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 28):
+	$(CCO) $< -o $@
+
+# Not a target:
+src/graph_builder.cpp:
+#  Implicit rule search has been done.
+ 
+#  Last modified 2022-01-06 01:03:26.2667857
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+include/greeks.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 22:37:33.878626
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+include/pricers.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 18:53:24.3402032
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+src/greeks.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 23:50:32.5283594
+#  File has been updated.
+#  Successfully updated.
+
+tests: bin/test_fdm bin/test_pricers
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+src/fdm_static.cpp:
+ 
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 19:29:36.3671954
+ 
+#  File has been updated.
+ 
+#  Successfully updated.
+
+# Not a target:
+src/pde.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 14:00:09.7508692
+#  File has been updated.
+#  Successfully updated.
+
+obj/fdm.o: src/fdm.cpp include/fdm.h include/pde.h include/discretization.h src/fdm_static.cpp
+#  Implicit rule search has not been done.
+#  Last modified 2022-01-06 00:48:55.5370182
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 10):
+	$(CCO) $< -o $@
+
+# Not a target:
+src/option.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 14:01:13.0267359
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+all: bin/price.exe
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+include/fdm.h:
+#  Implicit rule search has been done.
+ 
+#  Last modified 2022-01-05 14:01:12.7485731
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+include/option.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 14:00:09.4838957
+#  File has been updated.
+#  Successfully updated.
+
+obj/discretization.o: src/discretization.cpp
+#  Implicit rule search has not been done.
+#  Last modified 2022-01-06 00:48:54.4100561
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 7):
+	$(CCO) $< -o $@
+
+obj/pde.o: src/pde.cpp include/pde.h include/option.h
+#  Implicit rule search has not been done.
+#  Last modified 2022-01-06 00:48:52.8890382
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 16):
+	$(CCO) $< -o $@
+
+# Not a target:
+src/test_pricers.cpp:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+obj/greeks.o: src/greeks.cpp include/greeks.h
+#  Implicit rule search has not been done.
+#  Last modified 2022-01-06 00:48:57.4499584
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 22):
+	$(CCO) $< -o $@
+
+obj/graph_builder.o: src/graph_builder.cpp include/graph_builder.h
+#  Implicit rule search has not been done.
+#  Last modified 2022-01-06 01:07:30.9057386
+#  File has been updated.
+#  Successfully updated.
+#  recipe to execute (from 'Makefile', line 25):
+	$(CCO) $< -o $@
+
+# Not a target:
+include/vba_interface.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 22:15:50.7185281
+ 
+#  File has been updated.
+ 
+#  Successfully updated.
+ 
+
+# Not a target:
+ 
+src/test_fdm.cpp:
+ 
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+ 
+#  File has not been updated.
+
+# Not a target:
+src/pricers.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 19:31:38.3527771
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+include/pde.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-05 14:00:09.494376
+#  File has been updated.
+#  Successfully updated.
+
+ 
+bin/test_pricers: src/test_pricers.cpp obj/pde.o obj/option.o obj/fdm.o obj/discretization.o obj/pricers.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 37):
+	$(CC) $^ -o bin/test_pricers -lcriterion
+
+bin/test_fdm: src/test_fdm.cpp src/fdm_static.cpp obj/pde.o obj/option.o obj/discretization.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 34):
+	$(CC) $< obj/pde.o obj/option.o obj/discretization.o -o bin/test_fdm -lcriterion
+
+# files hash-table stats:
+ 
+# Load=36/1024=4%, Rehash=0, Collisions=0/90=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 61 / storage = 828 B / avg = 13 B
+# current buf: size = 8162 B / used = 828 B / count = 61 / avg = 13 B
+
+# strcache performance: lookups = 101 / hit rate = 39%
+# hash-table stats:
+# Load=61/8192=1%, Rehash=0, Collisions=0/101=0%
+# Finished Make data base on Thu Jan  6 09:39:10 2022
+
+ 

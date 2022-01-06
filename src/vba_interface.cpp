@@ -47,7 +47,9 @@ void store_greeks(Output &output,Input input){
 
 
 void create_output_file(std::string filename, Output output) {
-    std::ofstream put_out(filename,std::ofstream::out);
+    std::remove("output");
+    std::remove("output.csv");
+    std::ofstream put_out(filename);
     put_out << output.price << '\n';
     put_out << output.delta << '\n';
     put_out << output.gamma << '\n';
